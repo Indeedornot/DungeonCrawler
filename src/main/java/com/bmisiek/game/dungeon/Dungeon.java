@@ -13,7 +13,7 @@ import java.util.Map;
 /**
  * Main game object
  */
-public class Dungeon implements ApplicationListener<PlayerDiedEvent> {
+public class Dungeon implements ApplicationListener<PlayerDiedEvent>, DungeonInterface {
     private final Map<Point, Room> rooms;
 
     /**
@@ -23,7 +23,7 @@ public class Dungeon implements ApplicationListener<PlayerDiedEvent> {
 
     private Point startPoint;
 
-    Dungeon(Map<Point, Room> rooms, Point startPoint) {
+    public Dungeon(Map<Point, Room> rooms, Point startPoint) {
         this.rooms = rooms;
         if(rooms.isEmpty()) {
             throw new IllegalArgumentException("No rooms could be created.");

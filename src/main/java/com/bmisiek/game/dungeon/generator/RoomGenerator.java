@@ -1,28 +1,32 @@
-package com.bmisiek.game.dungeon;
+package com.bmisiek.game.dungeon.generator;
 
 import com.bmisiek.game.basic.Point;
+import com.bmisiek.game.dungeon.interfaces.RoomGeneratorInterface;
 import com.bmisiek.game.room.Room;
 import com.bmisiek.game.room.RoomFactory;
-import org.springframework.stereotype.Service;
+import lombok.Setter;
 
-import java.security.SecureRandom;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiConsumer;
 
-@Service
-public class DungeonFactory {
-    public static final int MAX_ROOM_COUNT = 10;
+class RoomGenerator implements RoomGeneratorInterface {
     private final RoomFactory roomFactory;
-    private final Random random = new SecureRandom();
-    private Map<Point, Room> rooms = new HashMap<>();
+
+    @Setter
     private Map<Class<? extends Room>, Double> roomWeights;
 
-    public DungeonFactory(RoomFactory roomFactory) {
+    @Setter
+    private Map<Point, Room> rooms;
+
+    private final Random random = new Random();
+
+    RoomGenerator(RoomFactory roomFactory, Map<Class<? extends Room>, Double> roomWeights, Map<Point, Room> rooms) {
         this.roomFactory = roomFactory;
+        this.roomWeights = roomWeights;
+        this.rooms = rooms;
     }
 
     private void forEachNeighbor(Point point, BiConsumer<Point, Room> action) {
@@ -78,48 +82,8 @@ public class DungeonFactory {
         return possibleRooms.getLast().getKey();
     }
 
-    private Room createRoomAt(Point point) {
+    public Room createRoomAt(Point point) {
         Class<? extends Room> roomClass = getRandomRoomClass(point);
         return (roomClass != null) ? roomFactory.createRoom(roomClass) : null;
-    }
-
-    private Point getNextPotentialPoint(Point currentPoint) {
-        return switch (random.nextInt(4)) {
-            case 0 -> new Point(currentPoint.getX() + 1, currentPoint.getY());
-            case 1 -> new Point(currentPoint.getX() - 1, currentPoint.getY());
-            case 2 -> new Point(currentPoint.getX(), currentPoint.getY() - 1);
-            default -> new Point(currentPoint.getX(), currentPoint.getY() + 1);
-        };
-    }
-
-    /*
-      @param roomWeights Weighted map of allowed room classes
-     */
-    public Dungeon createDungeon(Map<Class<? extends Room>, Double> roomWeights) {
-        this.rooms = new HashMap<>();
-        this.roomWeights = roomWeights;
-
-        Point currentPoint = new Point(0, 0);
-        rooms.put(currentPoint, createRoomAt(currentPoint)); // Create the starting room
-
-        for (int i = 1; i < MAX_ROOM_COUNT; i++) {
-            Point nextPotentialPoint = getNextPotentialPoint(currentPoint);
-            if (!rooms.containsKey(nextPotentialPoint)) {
-                Room nextRoom = createRoomAt(nextPotentialPoint);
-                if (nextRoom != null) {
-                    rooms.put(nextPotentialPoint, nextRoom);
-                    currentPoint = nextPotentialPoint; // Move to the newly created room
-                }
-            } else {
-                // If the next point is already occupied, try again from the current point
-                i--;
-            }
-        }
-
-        if(rooms.isEmpty()) {
-            throw new IllegalArgumentException("No rooms could be created.");
-        }
-
-        return new Dungeon(rooms);
     }
 }
