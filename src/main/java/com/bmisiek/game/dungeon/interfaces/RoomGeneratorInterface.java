@@ -4,5 +4,5 @@ import com.bmisiek.game.basic.Point;
 import com.bmisiek.game.room.Room;
 
 public interface RoomGeneratorInterface {
-    public Room createRoomAt(Point point);
+    Room createRoomAt(Point point);
 }

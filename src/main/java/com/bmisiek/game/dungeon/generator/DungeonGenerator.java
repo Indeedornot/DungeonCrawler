@@ -1,28 +1,30 @@
 package com.bmisiek.game.dungeon.generator;
 
 import com.bmisiek.game.basic.Point;
-import com.bmisiek.game.dungeon.Dungeon;
+import com.bmisiek.game.config.GameConfigManager;
 import com.bmisiek.game.dungeon.DungeonInterface;
-import com.bmisiek.game.dungeon.interfaces.DungeonGeneratorInterface;
 import com.bmisiek.game.dungeon.interfaces.RoomGeneratorInterface;
 import com.bmisiek.game.room.Room;
 import jakarta.annotation.Nullable;
-import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.Range;
 import org.springframework.data.util.Pair;
+import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
 import java.util.*;
 
-class DungeonGenerator implements DungeonGeneratorInterface {
-    public static final int MAX_ROOM_COUNT = 10;
+@Service
+public class DungeonGenerator {
     private final Random random = new SecureRandom();
     private final Map<Point, Room> rooms = new HashMap<>();
     private final RoomGeneratorInterface roomGenerator;
     private final DungeonFactory dungeonFactory;
+    private final Range<Integer> roomCountRange;
 
-    DungeonGenerator(DungeonFactory dungeonFactory, RoomGeneratorFactory roomGeneratorFactory, Map<Class<? extends Room>, Double> roomWeights) {
+    DungeonGenerator(DungeonFactory dungeonFactory, RoomGeneratorFactory roomGeneratorFactory, GameConfigManager gameConfigManager) {
         this.dungeonFactory = dungeonFactory;
-        roomGenerator = roomGeneratorFactory.create(roomWeights, rooms);
+        this.roomGenerator = roomGeneratorFactory.create(rooms);
+        this.roomCountRange = gameConfigManager.getConfig().getRoomCount();
     }
 
     private Point getDirectionPoint(Point currentPoint, int direction) {
@@ -99,13 +101,21 @@ class DungeonGenerator implements DungeonGeneratorInterface {
     private void CreateRooms(Point currentPoint) {
         rooms.put(currentPoint, roomGenerator.createRoomAt(currentPoint)); // Create the starting room
 
-        for (int i = 1; i < MAX_ROOM_COUNT; i++) {
+        var roomCount = getRoomCount();
+        for (int i = 1; i < roomCount; i++) {
             currentPoint = tryCreateNextRoomFrom(currentPoint);
             if(currentPoint == null) {
                 currentPoint = getNewEntrypoint(currentPoint);
                 i--;
             }
         }
+    }
+
+    private int getRoomCount() {
+        return random.nextInt(
+                roomCountRange.getLowerBound().getValue().orElseThrow(),
+                roomCountRange.getUpperBound().getValue().orElseThrow() + 1
+        );
     }
 
     private void ValidateDungeon() {

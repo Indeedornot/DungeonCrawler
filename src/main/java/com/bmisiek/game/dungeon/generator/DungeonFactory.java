@@ -5,9 +5,11 @@ import com.bmisiek.game.dungeon.Dungeon;
 import com.bmisiek.game.dungeon.DungeonInterface;
 import com.bmisiek.game.room.Room;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.stereotype.Service;
 
 import java.util.Map;
 
+@Service
 public class DungeonFactory {
     private final ApplicationEventPublisher applicationEventPublisher;
 
