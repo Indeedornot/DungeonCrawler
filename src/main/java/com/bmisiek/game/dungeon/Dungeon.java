@@ -1,6 +1,7 @@
 package com.bmisiek.game.dungeon;
 
 import com.bmisiek.game.basic.Point;
+import com.bmisiek.game.event.DungeonEmptyEvent;
 import com.bmisiek.game.event.PlayerDiedEvent;
 import com.bmisiek.game.event.PlayerMovedEvent;
 import com.bmisiek.game.event.data.PlayerMovedEventData;
@@ -11,6 +12,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationListener;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -75,6 +77,11 @@ public class Dungeon implements ApplicationListener<PlayerDiedEvent>, DungeonInt
 
     }
 
+    @Override
+    public List<Player> getPlayers() {
+        return players.keySet().stream().toList();
+    }
+
     public Point getPosition(Player player) {
         return players.get(player);
     }
@@ -85,5 +92,8 @@ public class Dungeon implements ApplicationListener<PlayerDiedEvent>, DungeonInt
     @Override
     public void onApplicationEvent(PlayerDiedEvent event) {
         players.remove(event.getEventData().getPlayer());
+        if(players.isEmpty()) {
+            applicationEventPublisher.publishEvent(new DungeonEmptyEvent(this));
+        }
     }
 }

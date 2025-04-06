@@ -89,7 +89,7 @@ public class DungeonGenerator {
     /*
       @param roomWeights Weighted map of allowed room classes
      */
-    public DungeonInterface createDungeon(Map<Class<? extends Room>, Double> roomWeights) {
+    public DungeonInterface createDungeon() {
         Point startPoint = new Point(0,0);
         CreateRooms(startPoint);
 

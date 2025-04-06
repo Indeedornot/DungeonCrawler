@@ -10,17 +10,17 @@ public class GameLoopFactory {
     private final PlayerFactory playerFactory;
 
     public GameLoopFactory(
-            DungeonGenerator dungeonGeneratorFactory,
+            DungeonGenerator dungeonGenerator,
             PlayerFactory playerFactory
     ) {
-        this.dungeonGenerator = dungeonGeneratorFactory;
+        this.dungeonGenerator = dungeonGenerator;
         this.playerFactory = playerFactory;
     }
 
     public GameLoop createGameLoop() {
         return new GameLoop(
                 playerFactory.createPlayer(),
-                dungeonGeneratorFactory.create()
+                dungeonGenerator.createDungeon()
         );
     }
 }
