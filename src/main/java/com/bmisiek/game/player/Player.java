@@ -1,14 +1,7 @@
 package com.bmisiek.game.player;
 
-import lombok.Getter;
-
-public class Player {
-    @Getter
-    private int health;
-
-    public Player(int health) {}
-
-    public void takeDamage(int damage) {
-        this.health -= damage;
-    }
+public abstract class Player {
+    public abstract int getIdentifier();
+    protected abstract void setHealth(int health);
+    public abstract int getHealth();
 }
