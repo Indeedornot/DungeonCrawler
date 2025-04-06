@@ -2,9 +2,8 @@ package com.bmisiek.game.player;
 
 import com.bmisiek.game.event.DamageTakenEvent;
 import com.bmisiek.game.event.PlayerDiedEvent;
-import lombok.Getter;
+import com.bmisiek.game.event.data.PlayerEventData;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -22,9 +21,10 @@ public class PlayerManager {
 
     public void takeDamage(@NotNull Player player, int damage) {
         player.setHealth(player.getHealth() - damage);
+        var eventData = new PlayerEventData(player);
         ApplicationEvent event = isAlive(player)
-                ? new DamageTakenEvent(this, player)
-                : new PlayerDiedEvent(this, player);
+                ? new DamageTakenEvent(this, eventData)
+                : new PlayerDiedEvent(this, eventData);
 
         applicationEventPublisher.publishEvent(event);
     }

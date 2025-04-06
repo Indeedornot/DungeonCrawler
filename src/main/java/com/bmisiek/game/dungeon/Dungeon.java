@@ -75,6 +75,6 @@ public class Dungeon implements ApplicationListener<PlayerDiedEvent>, DungeonInt
      */
     @Override
     public void onApplicationEvent(PlayerDiedEvent event) {
-        players.remove(event.getPlayer());
+        players.remove(event.getEventData().getPlayer());
     }
 }

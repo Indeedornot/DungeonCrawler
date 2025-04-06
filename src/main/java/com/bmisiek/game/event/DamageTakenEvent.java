@@ -1,15 +1,16 @@
 package com.bmisiek.game.event;
 
-import com.bmisiek.game.player.Player;
+import com.bmisiek.game.event.data.PlayerEventData;
 import lombok.Getter;
 import org.springframework.context.ApplicationEvent;
 
 @Getter
 public class DamageTakenEvent extends ApplicationEvent {
-    private final Player player;
 
-    public DamageTakenEvent(Object source, Player player) {
+    private final PlayerEventData eventData;
+
+    public DamageTakenEvent(Object source, PlayerEventData eventData) {
         super(source);
-        this.player = player;
+        this.eventData = eventData;
     }
 }
