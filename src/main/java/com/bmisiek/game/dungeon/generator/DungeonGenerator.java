@@ -7,6 +7,7 @@ import com.bmisiek.game.dungeon.interfaces.DungeonGeneratorInterface;
 import com.bmisiek.game.dungeon.interfaces.RoomGeneratorInterface;
 import com.bmisiek.game.room.Room;
 import jakarta.annotation.Nullable;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.util.Pair;
 
 import java.security.SecureRandom;
@@ -17,8 +18,10 @@ class DungeonGenerator implements DungeonGeneratorInterface {
     private final Random random = new SecureRandom();
     private final Map<Point, Room> rooms = new HashMap<>();
     private final RoomGeneratorInterface roomGenerator;
+    private final DungeonFactory dungeonFactory;
 
-    DungeonGenerator(RoomGeneratorFactory roomGeneratorFactory, Map<Class<? extends Room>, Double> roomWeights) {
+    DungeonGenerator(DungeonFactory dungeonFactory, RoomGeneratorFactory roomGeneratorFactory, Map<Class<? extends Room>, Double> roomWeights) {
+        this.dungeonFactory = dungeonFactory;
         roomGenerator = roomGeneratorFactory.create(roomWeights, rooms);
     }
 
@@ -90,7 +93,7 @@ class DungeonGenerator implements DungeonGeneratorInterface {
 
         ValidateDungeon();
 
-        return new Dungeon(rooms, startPoint);
+        return dungeonFactory.create(rooms, startPoint);
     }
 
     private void CreateRooms(Point currentPoint) {

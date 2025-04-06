@@ -2,9 +2,12 @@ package com.bmisiek.game.dungeon;
 
 import com.bmisiek.game.basic.Point;
 import com.bmisiek.game.event.PlayerDiedEvent;
+import com.bmisiek.game.event.PlayerMovedEvent;
+import com.bmisiek.game.event.data.PlayerMovedEventData;
 import com.bmisiek.game.exception.InvalidActionException;
 import com.bmisiek.game.player.Player;
 import com.bmisiek.game.room.Room;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationListener;
 
 import java.util.HashMap;
@@ -23,8 +26,12 @@ public class Dungeon implements ApplicationListener<PlayerDiedEvent>, DungeonInt
 
     private Point startPoint;
 
-    public Dungeon(Map<Point, Room> rooms, Point startPoint) {
+    private final ApplicationEventPublisher applicationEventPublisher;
+
+    public Dungeon(ApplicationEventPublisher applicationEventPublisher, Map<Point, Room> rooms, Point startPoint) {
+        this.applicationEventPublisher = applicationEventPublisher;
         this.rooms = rooms;
+
         if(rooms.isEmpty()) {
             throw new IllegalArgumentException("No rooms could be created.");
         }
@@ -64,6 +71,8 @@ public class Dungeon implements ApplicationListener<PlayerDiedEvent>, DungeonInt
         AssertValidMove(playerLocation, point);
 
         this.players.put(player, point);
+        applicationEventPublisher.publishEvent(new PlayerMovedEvent(this, new PlayerMovedEventData(player, playerLocation, point, this.rooms.get(point))));
+
     }
 
     public Point getPosition(Player player) {
