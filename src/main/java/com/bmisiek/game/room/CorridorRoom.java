@@ -15,7 +15,7 @@ public class CorridorRoom extends Room {
     }
 
     @Override
-    boolean canExistNextTo(Class<? extends Room> roomClass) {
+    public boolean canExistNextTo(Class<? extends Room> roomClass) {
         return true;
     }
 }

@@ -27,4 +27,9 @@ public class SpikyRoom extends Room {
             playerManager.takeDamage(player, 5);
         }
     }
+
+    @Override
+    public boolean canExistNextTo(Class<? extends Room> roomClass) {
+        return roomClass != HospitalRoom.class && super.canExistNextTo(roomClass);
+    }
 }
