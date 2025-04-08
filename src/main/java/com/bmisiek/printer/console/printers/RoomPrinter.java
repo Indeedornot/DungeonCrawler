@@ -12,15 +12,13 @@ import java.util.NoSuchElementException;
 @Service
 public class RoomPrinter {
     private final List<RoomPrinterInterface<?>> printers;
-    private final NullRoomPrinter defaultPrinter;
 
-    private RoomPrinter(List<RoomPrinterInterface<?>> printers, NullRoomPrinter defaultPrinter) {
+    private RoomPrinter(List<RoomPrinterInterface<?>> printers) {
         this.printers = printers;
-        this.defaultPrinter = defaultPrinter;
     }
 
     public <T extends Room> Room3x3 Print(T room) throws NoSuchElementException {
         var printer = printers.stream().filter(p -> p.Supports(room.getClass()));
-        return printer.findFirst().orElse(defaultPrinter).Print(room);
+        return printer.findFirst().orElseThrow().Print(room);
     }
 }
