@@ -1,6 +1,6 @@
 package com.bmisiek.printer.console.printers.room;
 
-import com.bmisiek.structures.Grid;
+import com.bmisiek.structures.grid.Grid;
 import lombok.Getter;
 
 @Getter

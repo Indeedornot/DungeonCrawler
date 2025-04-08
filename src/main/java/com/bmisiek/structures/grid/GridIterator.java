@@ -1,4 +1,4 @@
-package com.bmisiek.structures;
+package com.bmisiek.structures.grid;
 
 import org.jetbrains.annotations.Nullable;
 

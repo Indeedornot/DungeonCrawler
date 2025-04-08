@@ -1,4 +1,4 @@
-package com.bmisiek.structures;
+package com.bmisiek.structures.grid;
 
 import com.bmisiek.game.basic.Point;
 import lombok.Getter;
@@ -6,8 +6,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Array;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Iterator;
 

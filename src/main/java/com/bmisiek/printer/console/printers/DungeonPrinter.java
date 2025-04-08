@@ -7,7 +7,7 @@ import com.bmisiek.game.room.NullRoom;
 import com.bmisiek.game.room.Room;
 import com.bmisiek.printer.console.printers.room.Room3x3;
 import com.bmisiek.printer.contract.PrinterInterface;
-import com.bmisiek.structures.Grid;
+import com.bmisiek.structures.grid.Grid;
 import com.bmisiek.structures.IteratorExtension;
 import org.springframework.stereotype.Service;
 
