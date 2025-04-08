@@ -18,11 +18,17 @@ import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Scanner;
+import java.util.Stack;
 
 @Service
 public class ConsoleInterface implements GuiInterface, ApplicationListener<ApplicationEvent> {
     private final DungeonPrinter dungeonPrinter;
     private final DungeonPlayerPrinter dungeonPlayerPrinter;
+
+    /**
+     * Used to schedule messages to be fired only after the next turn has been rendered
+     */
+    private final Stack<String> messageQueue = new Stack<>();
 
     public ConsoleInterface(DungeonPrinter dungeonPrinter, DungeonPlayerPrinter dungeonPlayerPrinter) {
         this.dungeonPrinter = dungeonPrinter;
@@ -46,6 +52,7 @@ public class ConsoleInterface implements GuiInterface, ApplicationListener<Appli
         for(var player: dungeon.getPlayers()){
             dungeonPlayerPrinter.Print(dungeon, player);
         }
+        messageQueue.forEach(System.out::println);
 
         PrintUpdateSeparator();
     }
@@ -90,10 +97,6 @@ public class ConsoleInterface implements GuiInterface, ApplicationListener<Appli
         }
     }
 
-    private void printLine(String line) {
-        System.console().printf(line + System.lineSeparator());
-    }
-
     @Override
     public void onApplicationEvent(@NotNull ApplicationEvent event) {
         if (event instanceof DungeonEnteredEvent) {
@@ -104,10 +107,10 @@ public class ConsoleInterface implements GuiInterface, ApplicationListener<Appli
     }
 
     private void onDamageTakenEvent(DamageTakenEvent event) {
-        printLine(MessageFormat.format("Player took {0} damage", event.getEventData().getDamage()));
+        messageQueue.add(MessageFormat.format("Player took {0} damage", event.getEventData().getDamage()));
     }
 
     private void onDungeonEnteredEvent(DungeonEnteredEvent event) {
-        printLine("Player entered the dungeon");
+        messageQueue.add("Player entered the dungeon");
     }
 }
