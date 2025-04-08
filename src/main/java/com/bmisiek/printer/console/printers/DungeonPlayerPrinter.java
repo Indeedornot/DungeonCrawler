@@ -8,10 +8,9 @@ import org.springframework.stereotype.Service;
 public class DungeonPlayerPrinter {
     public DungeonPlayerPrinter() {}
 
-    public void Print(DungeonManagerInterface dungeon, Player player) {
-        var playerPosition = dungeon.getPosition(player);
+    public void Print(DungeonManagerInterface dungeon) {
         System.out.println("Player info: ");
-        System.out.println(" position: " + playerPosition);
-        System.out.println(" health: " + player.getHealth());
+        System.out.println(" position: " + dungeon.getPlayerPosition());
+        System.out.println(" health: " + dungeon.getPlayer().getHealth());
     }
 }

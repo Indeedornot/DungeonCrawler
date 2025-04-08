@@ -14,6 +14,7 @@ import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationListener;
+import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -34,7 +35,7 @@ public class DungeonManager implements ApplicationListener<PlayerDiedEvent>, Dun
     }
 
     public void enter(Player player) {
-        this.dungeon.players.put(player, dungeon.startPoint);
+        this.dungeon.player = Pair.of(player, dungeon.startPoint);
         applicationEventPublisher.publishEvent(new DungeonEnteredEvent(this, new DungeonEnteredEventData(player)));
     }
 
@@ -57,48 +58,49 @@ public class DungeonManager implements ApplicationListener<PlayerDiedEvent>, Dun
         }
     }
 
-    public void tryMove(Player player, Point direction) throws InvalidActionException {
-        Point currentLocation = this.dungeon.players.get(player);
+    public void tryMove(Point direction) throws InvalidActionException {
+        assert this.dungeon.player != null;
+        Point currentLocation = this.dungeon.player.getSecond();
         Point newLocation = currentLocation.add(direction);
 
         AssertValidMove(currentLocation, newLocation);
 
-        this.dungeon.players.put(player, newLocation);
+        this.dungeon.player = Pair.of(getPlayer(), newLocation);
         applicationEventPublisher.publishEvent(new PlayerMovedEvent(
                 this,
                 new PlayerMovedEventData(
-                        player,
+                        getPlayer(),
                         currentLocation,
                         newLocation,
                         this.dungeon.rooms.get(direction)
                 )
         ));
 
-        this.dungeon.rooms.get(newLocation).Act(player);
+        this.dungeon.rooms.get(newLocation).Act(getPlayer());
     }
 
     @Override
-    public List<Player> getPlayers() {
-        return dungeon.players.keySet().stream().toList();
+    public Player getPlayer() {
+        assert dungeon.player != null;
+        return dungeon.player.getFirst();
+    }
+
+    @Override
+    public Point getPlayerPosition() {
+        assert this.dungeon.player != null;
+        return this.dungeon.player.getSecond();
     }
 
     @Override
     public Map<Point, Room> getRooms() {
         return dungeon.rooms;
     }
-
-    public Point getPosition(Player player) {
-        return dungeon.players.get(player);
-    }
-
     /**
      * Removes dead players
      */
     @Override
     public void onApplicationEvent(@NotNull PlayerDiedEvent event) {
-        dungeon.players.remove(event.getEventData().getPlayer());
-        if(dungeon.players.isEmpty()) {
-            applicationEventPublisher.publishEvent(new DungeonEmptyEvent(this));
-        }
+        dungeon.player = null;
+        applicationEventPublisher.publishEvent(new DungeonEmptyEvent(this));
     }
 }

@@ -46,7 +46,7 @@ public class GameLoop implements ApplicationListener<DungeonEmptyEvent> {
     private void tryPerformAction(GameAction action) {
         try {
             if(action.IsMovement()) {
-                dungeonManager.tryMove(player, action.GetMovement());
+                dungeonManager.tryMove(action.GetMovement());
             }
         } catch (InvalidActionException e) {
             System.out.println(e.getMessage());

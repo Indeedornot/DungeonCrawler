@@ -5,7 +5,6 @@ import com.bmisiek.game.exception.InvalidActionException;
 import com.bmisiek.game.player.Player;
 import com.bmisiek.game.room.Room;
 
-import java.util.List;
 import java.util.Map;
 
 public interface DungeonManagerInterface {
@@ -13,11 +12,11 @@ public interface DungeonManagerInterface {
 
     void enter(Player player);
 
-    Point getPosition(Player player);
+    Point getPlayerPosition();
 
-    void tryMove(Player player, Point point) throws InvalidActionException;
+    void tryMove(Point point) throws InvalidActionException;
 
-    List<Player> getPlayers();
+    Player getPlayer();
 
     Map<Point, Room> getRooms();
 }

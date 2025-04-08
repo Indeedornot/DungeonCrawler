@@ -53,9 +53,7 @@ public class ConsoleInterface implements GuiInterface, ApplicationListener<Appli
 
     public void Update(@NotNull DungeonManagerInterface dungeon) {
         dungeonPrinter.Print(dungeon);
-        for(var player: dungeon.getPlayers()){
-            dungeonPlayerPrinter.Print(dungeon, player);
-        }
+        dungeonPlayerPrinter.Print(dungeon);
 
         DumpMessageQueue();
         PrintUpdateSeparator();

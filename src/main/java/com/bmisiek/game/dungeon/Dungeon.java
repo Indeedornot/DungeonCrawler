@@ -3,10 +3,12 @@ package com.bmisiek.game.dungeon;
 import com.bmisiek.structures.Point;
 import com.bmisiek.game.player.Player;
 import com.bmisiek.game.room.Room;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Scope;
+import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
@@ -21,7 +23,7 @@ public class Dungeon {
     /**
      * Stores players with their position
      */
-    protected final Map<Player, Point> players;
+    protected @Nullable Pair<Player, Point> player;
 
     protected final Point startPoint;
 
@@ -37,7 +39,5 @@ public class Dungeon {
         if(!rooms.containsKey(startPoint)) {
             throw new IllegalArgumentException("No start room found in the room array.");
         }
-
-        this.players = new HashMap<>();
     }
 }
