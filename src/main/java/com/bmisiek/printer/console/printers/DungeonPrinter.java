@@ -9,6 +9,7 @@ import com.bmisiek.printer.console.printers.room.Room3x3;
 import com.bmisiek.printer.contract.PrinterInterface;
 import com.bmisiek.structures.grid.Grid;
 import com.bmisiek.structures.IteratorExtension;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -28,7 +29,6 @@ public class DungeonPrinter implements PrinterInterface<DungeonManagerInterface>
 
     private final RoomPrinter roomPrinter;
 
-    // --- Constructor ---
     public DungeonPrinter(RoomPrinter roomPrinter) {
         this.roomPrinter = roomPrinter;
     }
@@ -40,33 +40,21 @@ public class DungeonPrinter implements PrinterInterface<DungeonManagerInterface>
 
     @Override
     public void Print(DungeonManagerInterface dungeon) {
-        if (dungeon == null || dungeon.getRooms().isEmpty()) {
-            System.out.println("Dungeon is empty.");
-            return;
-    }
-
-        // 1. Calculate dungeon layout information
         DungeonLayoutInfo layoutInfo = calculateLayoutInfo(dungeon);
 
-        // 2. Create a grid representation of the dungeon rooms
         Grid<Room3x3> roomGrid = createRoomGrid(dungeon, layoutInfo);
-
-        // 3. Assemble the lines for printing from the grid
         List<String> printLines = assemblePrintLines(roomGrid);
 
-        // 4. Add coordinate labels
-        addYAxisLabels(printLines, layoutInfo);
-        addXAxisLabels(printLines, layoutInfo);
+        AddCoordinateLabels(printLines, layoutInfo);
 
-        // 5. Print to console
         printLines.forEach(System.out::println);
     }
 
-    // --- Helper Methods ---
+    private void AddCoordinateLabels(List<String> printLines, DungeonLayoutInfo layoutInfo) {
+        addYAxisLabels(printLines, layoutInfo);
+        AddXAxisLabels(printLines, layoutInfo);
+    }
 
-    /**
-     * Calculates the boundaries and dimensions of the dungeon layout.
-     */
     private DungeonLayoutInfo calculateLayoutInfo(DungeonManagerInterface dungeon) {
         Map<Point, Room> rooms = dungeon.getRooms();
 
@@ -81,7 +69,7 @@ public class DungeonPrinter implements PrinterInterface<DungeonManagerInterface>
         int gridHeight = maxY - minY + 1;
 
         return new DungeonLayoutInfo(topLeft, bottomRight, gridWidth, gridHeight);
-        }
+    }
 
     /**
      * Creates a 2D grid of Room3x3 representations from the dungeon data.
@@ -148,15 +136,14 @@ public class DungeonPrinter implements PrinterInterface<DungeonManagerInterface>
     }
 
     /**
-     * Creates a single line of text by concatenating the corresponding sub-line
+     * Creates a single line of text by concatenating the corresponding subline
      * from each room in the row.
      * Example: Get line 1 from room1, line 1 from room2, line 1 from room3 and join them.
      */
     private String formatSingleLineAcrossRooms(Room3x3[] roomRow, int subRowIndex) {
         return Arrays.stream(roomRow)
-                // Assuming Room3x3.GetRow(i) returns the String for that specific line
                 .map(room -> String.join("", room.GetRow(subRowIndex)))
-                .collect(Collectors.joining()); // Join lines directly side-by-side
+                .collect(Collectors.joining());
     }
 
     /**
@@ -164,54 +151,49 @@ public class DungeonPrinter implements PrinterInterface<DungeonManagerInterface>
      * Labels are aligned with the vertical center of each room row.
      */
     private void addYAxisLabels(List<String> printLines, DungeonLayoutInfo layoutInfo) {
-        String verticalPadding = " ".repeat(COORDINATE_AXIS_PADDING);
-        int middleLineIndexInRoom = ROOM_HEIGHT / 2; // e.g., index 1 for height 3
 
         for (int gridRowIndex = 0; gridRowIndex < printLines.size(); gridRowIndex++) {
-            // Calculate the original Y coordinate corresponding to this grid row
-            // Assuming i is the index of the *room row* string (which contains ROOM_HEIGHT actual lines)
-            // Use RangeExtension like the original, assuming it maps grid index back to world coordinate
-            // int originalY = RangeExtension.AdjustToBounds(layoutInfo.getYBound(), gridRowIndex); // If YBound holds minY, maxY
-             // Or calculate directly if RangeExtension isn't needed:
-            int originalY = layoutInfo.topLeft().getY() + gridRowIndex;
-
-
-            String yLabel = String.valueOf(originalY);
-
-            int paddingLeft = (COORDINATE_AXIS_PADDING - yLabel.length()) / 2;
-            int paddingRight = COORDINATE_AXIS_PADDING - yLabel.length() - paddingLeft;
-            String labelLinePrefix = " ".repeat(paddingLeft) + yLabel + " ".repeat(paddingRight);
-
-            // Split the multi-line room row string
-            String[] subLines = printLines.get(gridRowIndex).split(LINE_SEPARATOR, -1); // Keep trailing empty strings
-
-            // Apply padding/label
-            for (int lineIdx = 0; lineIdx < subLines.length; lineIdx++) {
-                if (lineIdx == middleLineIndexInRoom) {
-                    subLines[lineIdx] = labelLinePrefix + subLines[lineIdx];
-                } else {
-                    subLines[lineIdx] = verticalPadding + subLines[lineIdx];
-                }
+            AddYAxisLabel(printLines, layoutInfo, gridRowIndex);
+        }
     }
 
-            // Join back and update the list
-            printLines.set(gridRowIndex, String.join(LINE_SEPARATOR, subLines));
-                }
-            }
+    private static void AddYAxisLabel(List<String> printLines, DungeonLayoutInfo layoutInfo, int gridRowIndex) {
+        int middleLineIndexInRoom = ROOM_HEIGHT / 2;
+        String verticalPadding = " ".repeat(COORDINATE_AXIS_PADDING);
+
+        //Retrieve original Y index by reversing adjustment
+        int originalY = layoutInfo.topLeft().getY() + gridRowIndex;
+
+        String yLabel = String.valueOf(originalY);
+        String labelLinePrefix = CenterLine(yLabel, COORDINATE_AXIS_PADDING);
+
+        // Split the multi-line room row string
+        String[] subLines = printLines.get(gridRowIndex).split(LINE_SEPARATOR, -1);
+
+        // Apply padding/label
+        subLines = Arrays.stream(subLines).map(line -> verticalPadding + line).toArray(String[]::new);
+        subLines[middleLineIndexInRoom] = subLines[middleLineIndexInRoom].replace(verticalPadding, labelLinePrefix);
+
+        // Join back and update the list
+        printLines.set(gridRowIndex, String.join(LINE_SEPARATOR, subLines));
+    }
+
+    private static @NotNull String CenterLine(String yLabel, int maxWidth) {
+        int paddingLeft = (maxWidth - yLabel.length()) / 2;
+        int paddingRight = maxWidth - yLabel.length() - paddingLeft;
+        return " ".repeat(paddingLeft) + yLabel + " ".repeat(paddingRight);
+    }
 
     /**
      * Adds an X-axis coordinate label row at the top of the print lines.
      * Labels are centered above each room column.
      */
-     private void addXAxisLabels(List<String> printLines, DungeonLayoutInfo layoutInfo) {
+     private void AddXAxisLabels(List<String> printLines, DungeonLayoutInfo layoutInfo) {
         StringBuilder header = new StringBuilder();
         header.append(" ".repeat(COORDINATE_AXIS_PADDING)); // Initial padding to align with Y labels
 
         for (int gridColIndex = 0; gridColIndex < layoutInfo.gridWidth(); gridColIndex++) {
-            // Calculate original X coordinate
-             // Use RangeExtension like the original, assuming it maps grid index back to world coordinate
-            // int originalX = RangeExtension.AdjustToBounds(layoutInfo.getXBound(), gridColIndex); // If XBound holds minX, maxX
-            // Or calculate directly:
+            // Calculate original X coordinate by reversing mapping
             int originalX = layoutInfo.topLeft().getX() + gridColIndex;
 
             String xLabel = String.valueOf(originalX);
@@ -226,31 +208,6 @@ public class DungeonPrinter implements PrinterInterface<DungeonManagerInterface>
             header.append(" ".repeat(rightPadding));
         }
 
-        // Add the header row at the beginning
-        // Use add(0, ...) for ArrayList or addFirst() if it were a LinkedList
-         if (!printLines.isEmpty()) { // Avoid adding header if there are no rows
-            printLines.addFirst(header.toString());
-         } else {
-             // Handle case of empty grid (maybe print only header?)
-             System.out.println(header.toString()); // Print just the header if no rooms
+        printLines.addFirst(header.toString());
     }
-}
-
-    // --- Inner Record for Layout Info ---
-
-    /**
-     * Holds calculated information about the dungeon's layout in the grid.
-     *
-     * @param topLeft     The minimum (top-leftmost) coordinate point containing a room.
-     * @param bottomRight The maximum (bottom-rightmost) coordinate point containing a room.
-     * @param gridWidth   The width of the grid needed to contain all rooms (in room units).
-     * @param gridHeight  The height of the grid needed to contain all rooms (in room units).
-     */
-    private record DungeonLayoutInfo(
-            Point topLeft,
-            Point bottomRight,
-            int gridWidth,
-            int gridHeight
-    ) {}
-
 }
