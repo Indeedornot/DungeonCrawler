@@ -1,7 +1,6 @@
 package com.bmisiek.printer.console.printers;
 
 import com.bmisiek.game.room.Room;
-import com.bmisiek.printer.console.printers.room.NullRoomPrinter;
 import com.bmisiek.printer.console.printers.room.Room3x3;
 import com.bmisiek.printer.console.printers.room.RoomPrinterInterface;
 import org.springframework.stereotype.Service;

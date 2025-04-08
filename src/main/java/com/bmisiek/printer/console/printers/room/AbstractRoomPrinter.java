@@ -12,7 +12,7 @@ public abstract class AbstractRoomPrinter {
     protected Room3x3 fromString(String string) {
         return new Room3x3(Arrays.stream(string.trim().split("[\n\r]"))
                 .filter(p -> !p.isEmpty())
-                .map(rowString -> rowString.split(""))
+                .map(rowString -> rowString.trim().split(""))
                 .toArray(String[][]::new));
     }
 }
