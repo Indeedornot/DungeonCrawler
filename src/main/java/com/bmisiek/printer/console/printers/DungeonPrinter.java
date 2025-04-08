@@ -7,9 +7,14 @@ import com.bmisiek.game.room.NullRoom;
 import com.bmisiek.printer.console.printers.room.Room3x3;
 import com.bmisiek.printer.contract.PrinterInterface;
 import com.bmisiek.structures.Grid;
+import com.bmisiek.structures.RangeExtension;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Range;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
+
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
 @Service
 public class DungeonPrinter implements PrinterInterface<DungeonInterface> {
@@ -38,10 +43,6 @@ public class DungeonPrinter implements PrinterInterface<DungeonInterface> {
         return Pair.of(Range.closed(minX, maxX), Range.closed(minY, maxY));
     }
 
-    private Integer getRangeLength(Range<Integer> range) {
-        return Math.abs(range.getUpperBound().getValue().orElseThrow()) + Math.abs(range.getLowerBound().getValue().orElseThrow()) + 1;
-    }
-
     /**
      * Ensures that values in ranges starting from non-zero numbers are correctly adjusted to 0
      */
@@ -62,25 +63,42 @@ public class DungeonPrinter implements PrinterInterface<DungeonInterface> {
      */
     @Override
     public void Print(DungeonInterface object) {
-        var grid = GetRoomRepresentations(object);
+        PrintRooms(object);
+    }
 
-        var iterator = grid.getRowIterator();
-        while (iterator.hasNext()) {
-            var row = iterator.next();
-            //print row by row the 3x3
-            for(int i = 0; i < 3; i++) {
-                for(var item : row) {
-                    System.out.printf(String.join("", item.GetRow(i)));
-                }
-                System.out.println();
-            }
+    private void PrintRooms(DungeonInterface object) {
+        var grid = GetRoomRepresentations(object);
+        grid.getRowIterator().forEachRemaining(DungeonPrinter::PrintRoomRow);
+    }
+
+    /*
+        Prints a row by going through each row
+        [
+            1. -> xxx xxx xxx
+            2. -> xxx xxx xxx
+            3. -> xxx xxx xxx
+        ]
+     */
+    private static void PrintRoomRow(Room3x3[] roomRow) {
+        for(int subRow = 0; subRow < 3; subRow++) {
+            var line = GetGridRow(roomRow, subRow);
+            System.out.println(line);
         }
     }
 
+    private static @NotNull String GetGridRow(Room3x3[] roomRow, int subRow) {
+        return Arrays.stream(roomRow)
+                .map(room -> String.join("", room.GetRow(subRow)))
+                .collect(Collectors.joining());
+    }
+
+    /*
+        Maps Room hashmap to a 2d grid, adjusting room positions to 0x0 to allow for uniform printing
+     */
     private Grid<Room3x3> GetRoomRepresentations(DungeonInterface object) {
         var span  = GetRoomGridSpan(object);
-        int xSpan = getRangeLength(span.getFirst());
-        int ySpan = getRangeLength(span.getSecond());
+        int xSpan = RangeExtension.getLength(span.getFirst());
+        int ySpan = RangeExtension.getLength(span.getSecond());
 
         var grid = new Grid<>(Room3x3.class, xSpan, ySpan);
 
@@ -90,6 +108,12 @@ public class DungeonPrinter implements PrinterInterface<DungeonInterface> {
             grid.setAt(adjustedPoint, roomRepresentation);
         }
 
+        FillEmptyWithNullRooms(xSpan, ySpan, grid);
+
+        return grid;
+    }
+
+    private void FillEmptyWithNullRooms(int xSpan, int ySpan, Grid<Room3x3> grid) {
         for(int i = 0; i < xSpan; i++) {
             for(int j = 0; j < ySpan; j++) {
                 if(!grid.has(i, j)) {
@@ -97,7 +121,5 @@ public class DungeonPrinter implements PrinterInterface<DungeonInterface> {
                 }
             }
         }
-
-        return grid;
     }
 }
