@@ -3,6 +3,8 @@ package com.bmisiek.printer.console;
 import com.bmisiek.game.dungeon.DungeonInterface;
 import com.bmisiek.game.event.DamageTakenEvent;
 import com.bmisiek.game.event.DungeonEnteredEvent;
+import com.bmisiek.game.event.HealedEvent;
+import com.bmisiek.game.event.data.HealedEventData;
 import com.bmisiek.game.player.Player;
 import com.bmisiek.printer.console.printers.DungeonPlayerPrinter;
 import com.bmisiek.printer.console.printers.DungeonPrinter;
@@ -53,6 +55,7 @@ public class ConsoleInterface implements GuiInterface, ApplicationListener<Appli
             dungeonPlayerPrinter.Print(dungeon, player);
         }
         messageQueue.forEach(System.out::println);
+        messageQueue.clear();
 
         PrintUpdateSeparator();
     }
@@ -99,10 +102,11 @@ public class ConsoleInterface implements GuiInterface, ApplicationListener<Appli
 
     @Override
     public void onApplicationEvent(@NotNull ApplicationEvent event) {
-        if (event instanceof DungeonEnteredEvent) {
-            onDungeonEnteredEvent((DungeonEnteredEvent) event);
-        } else if (event instanceof DamageTakenEvent) {
-            onDamageTakenEvent((DamageTakenEvent) event);
+        switch (event) {
+            case DungeonEnteredEvent dungeonEnteredEvent -> onDungeonEnteredEvent(dungeonEnteredEvent);
+            case DamageTakenEvent damageTakenEvent -> onDamageTakenEvent(damageTakenEvent);
+            case HealedEvent healedEvent -> onHealedEvent(healedEvent);
+            default -> {}
         }
     }
 
@@ -112,5 +116,9 @@ public class ConsoleInterface implements GuiInterface, ApplicationListener<Appli
 
     private void onDungeonEnteredEvent(DungeonEnteredEvent event) {
         messageQueue.add("Player entered the dungeon");
+    }
+
+    private void onHealedEvent(HealedEvent event) {
+        messageQueue.add(MessageFormat.format("Player has gained additional {0} health", event.getEventData().getHeal()));
     }
 }

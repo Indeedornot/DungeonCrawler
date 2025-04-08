@@ -1,8 +1,10 @@
 package com.bmisiek.game.player;
 
 import com.bmisiek.game.event.DamageTakenEvent;
+import com.bmisiek.game.event.HealedEvent;
 import com.bmisiek.game.event.PlayerDiedEvent;
 import com.bmisiek.game.event.data.DamageTakenEventData;
+import com.bmisiek.game.event.data.HealedEventData;
 import com.bmisiek.game.event.data.PlayerEventData;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.context.ApplicationEvent;
@@ -28,6 +30,7 @@ public class PlayerManager {
 
     public void heal(@NotNull Player player, int heal) {
         player.setHealth(player.getHealth() + heal);
+        applicationEventPublisher.publishEvent(new HealedEvent(this, new HealedEventData(player, heal)));
     }
 
     protected boolean isAlive(@NotNull Player player) {
