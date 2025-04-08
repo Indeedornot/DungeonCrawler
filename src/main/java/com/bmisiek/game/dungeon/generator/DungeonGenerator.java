@@ -5,6 +5,7 @@ import com.bmisiek.game.config.GameConfigManager;
 import com.bmisiek.game.dungeon.DungeonInterface;
 import com.bmisiek.game.dungeon.interfaces.RoomGeneratorInterface;
 import com.bmisiek.game.room.Room;
+import com.bmisiek.game.room.SpawnRoom;
 import jakarta.annotation.Nullable;
 import org.springframework.data.domain.Range;
 import org.springframework.data.util.Pair;
@@ -99,7 +100,7 @@ public class DungeonGenerator {
     }
 
     private void CreateRooms(Point currentPoint) {
-        rooms.put(currentPoint, roomGenerator.createRoomAt(currentPoint)); // Create the starting room
+        rooms.put(currentPoint, new SpawnRoom()); // Create the starting room
 
         var roomCount = getRoomCount();
         for (int i = 1; i < roomCount; i++) {

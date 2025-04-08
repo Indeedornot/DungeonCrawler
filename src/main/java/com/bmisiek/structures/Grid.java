@@ -87,6 +87,24 @@ public class Grid<T> implements Iterable<T> {
         return new RowIterator<>(this);
     }
 
+    public @NotNull Iterable<T[]> GetRows() {
+        return new Iterable<>() {
+            @Override
+            public @NotNull Iterator<T[]> iterator() {
+                return getRowIterator();
+            }
+        };
+    }
+
+    public @NotNull Iterable<T[]> GetColumns() {
+        return new Iterable<>() {
+            @Override
+            public @NotNull Iterator<T[]> iterator() {
+                return getColumnIterator();
+            }
+        };
+    }
+
     public @NotNull Iterator<T[]> getColumnIterator() {
         return new ColumnIterator<>(this);
     }

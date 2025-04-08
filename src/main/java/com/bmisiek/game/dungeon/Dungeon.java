@@ -72,13 +72,16 @@ public class Dungeon implements ApplicationListener<PlayerDiedEvent>, DungeonInt
         }
     }
 
-    public void tryMove(Player player, Point point) throws InvalidActionException {
-        Point playerLocation = this.players.get(player);
-        AssertValidMove(playerLocation, point);
+    public void tryMove(Player player, Point direction) throws InvalidActionException {
+        Point currentLocation = this.players.get(player);
+        Point newLocation = currentLocation.add(direction);
 
-        this.players.put(player, point);
-        applicationEventPublisher.publishEvent(new PlayerMovedEvent(this, new PlayerMovedEventData(player, playerLocation, point, this.rooms.get(point))));
+        AssertValidMove(currentLocation, newLocation);
 
+        this.players.put(player, newLocation);
+        applicationEventPublisher.publishEvent(new PlayerMovedEvent(this, new PlayerMovedEventData(player, currentLocation, newLocation, this.rooms.get(direction))));
+
+        this.rooms.get(newLocation).Act(player);
     }
 
     @Override

@@ -4,6 +4,7 @@ import com.bmisiek.game.dungeon.DungeonInterface;
 import com.bmisiek.game.event.DamageTakenEvent;
 import com.bmisiek.game.event.DungeonEnteredEvent;
 import com.bmisiek.game.player.Player;
+import com.bmisiek.printer.console.printers.DungeonPlayerPrinter;
 import com.bmisiek.printer.console.printers.DungeonPrinter;
 import com.bmisiek.printer.contract.ActionNotFoundException;
 import com.bmisiek.printer.contract.GameAction;
@@ -21,9 +22,11 @@ import java.util.Scanner;
 @Service
 public class ConsoleInterface implements GuiInterface, ApplicationListener<ApplicationEvent> {
     private final DungeonPrinter dungeonPrinter;
+    private final DungeonPlayerPrinter dungeonPlayerPrinter;
 
-    public ConsoleInterface(DungeonPrinter dungeonPrinter) {
+    public ConsoleInterface(DungeonPrinter dungeonPrinter, DungeonPlayerPrinter dungeonPlayerPrinter) {
         this.dungeonPrinter = dungeonPrinter;
+        this.dungeonPlayerPrinter = dungeonPlayerPrinter;
     }
 
     private void PrintNewLines(int count) {
@@ -32,7 +35,7 @@ public class ConsoleInterface implements GuiInterface, ApplicationListener<Appli
         }
     }
 
-    private void SeparateUpdates(){
+    private void PrintUpdateSeparator(){
         PrintNewLines(2);
         System.out.println("-".repeat(20));
         PrintNewLines(2);
@@ -40,7 +43,11 @@ public class ConsoleInterface implements GuiInterface, ApplicationListener<Appli
 
     public void Update(@NotNull DungeonInterface dungeon) {
         dungeonPrinter.Print(dungeon);
-        SeparateUpdates();
+        for(var player: dungeon.getPlayers()){
+            dungeonPlayerPrinter.Print(dungeon, player);
+        }
+
+        PrintUpdateSeparator();
     }
 
     private static final HashMap<String, GameAction> actions = new HashMap<>() {{
