@@ -1,6 +1,6 @@
 package com.bmisiek.printer.contract;
 
-import com.bmisiek.game.basic.Point;
+import com.bmisiek.structures.Point;
 
 public enum GameAction {
     MOVE_UP,

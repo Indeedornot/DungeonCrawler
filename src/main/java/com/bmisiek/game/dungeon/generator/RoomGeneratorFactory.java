@@ -1,6 +1,6 @@
 package com.bmisiek.game.dungeon.generator;
 
-import com.bmisiek.game.basic.Point;
+import com.bmisiek.structures.Point;
 import com.bmisiek.game.config.GameConfigManager;
 import com.bmisiek.game.dungeon.interfaces.RoomGeneratorInterface;
 import com.bmisiek.game.room.Room;

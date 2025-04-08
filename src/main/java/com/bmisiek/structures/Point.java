@@ -1,7 +1,6 @@
-package com.bmisiek.game.basic;
+package com.bmisiek.structures;
 
 import lombok.Getter;
-import lombok.Setter;
 
 import java.util.Objects;
 

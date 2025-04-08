@@ -1,6 +1,6 @@
 package com.bmisiek.printer.console.printers;
 
-import com.bmisiek.game.basic.Point;
+import com.bmisiek.structures.Point;
 import com.bmisiek.game.dungeon.Dungeon;
 import com.bmisiek.game.dungeon.DungeonInterface;
 import com.bmisiek.game.room.NullRoom;

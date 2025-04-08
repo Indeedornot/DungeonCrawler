@@ -1,6 +1,6 @@
 package com.bmisiek.game.event.data;
 
-import com.bmisiek.game.basic.Point;
+import com.bmisiek.structures.Point;
 import com.bmisiek.game.player.Player;
 import com.bmisiek.game.room.Room;
 import lombok.Getter;

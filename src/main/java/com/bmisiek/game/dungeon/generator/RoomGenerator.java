@@ -1,13 +1,12 @@
 package com.bmisiek.game.dungeon.generator;
 
-import com.bmisiek.game.basic.Point;
+import com.bmisiek.structures.Point;
 import com.bmisiek.game.dungeon.interfaces.RoomGeneratorInterface;
 import com.bmisiek.game.room.Room;
 import com.bmisiek.game.room.RoomFactory;
 import lombok.Setter;
 import lombok.SneakyThrows;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;

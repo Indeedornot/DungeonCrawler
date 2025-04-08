@@ -1,6 +1,6 @@
 package com.bmisiek.structures.grid;
 
-import com.bmisiek.game.basic.Point;
+import com.bmisiek.structures.Point;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

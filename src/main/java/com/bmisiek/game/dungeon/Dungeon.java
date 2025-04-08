@@ -1,6 +1,6 @@
 package com.bmisiek.game.dungeon;
 
-import com.bmisiek.game.basic.Point;
+import com.bmisiek.structures.Point;
 import com.bmisiek.game.event.DungeonEmptyEvent;
 import com.bmisiek.game.event.DungeonEnteredEvent;
 import com.bmisiek.game.event.PlayerDiedEvent;
