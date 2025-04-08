@@ -1,6 +1,6 @@
 package com.bmisiek;
 
-import com.bmisiek.game.gameloop.GameLoopFactory;
+import com.bmisiek.game.gameloop.GameLoop;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
@@ -13,10 +13,10 @@ public class SpringBootConsoleApplication implements CommandLineRunner {
     private static final Logger LOG = LoggerFactory
             .getLogger(SpringBootConsoleApplication.class);
 
-    private final GameLoopFactory gameLoopFactory;
+    private final GameLoop gameLoop;
 
-    public SpringBootConsoleApplication(GameLoopFactory gameLoopFactory) {
-        this.gameLoopFactory = gameLoopFactory;
+    public SpringBootConsoleApplication(GameLoop gameLoop) {
+        this.gameLoop = gameLoop;
     }
 
     public static void main(String[] args) {
@@ -33,7 +33,6 @@ public class SpringBootConsoleApplication implements CommandLineRunner {
 //            LOG.info("args[{}]: {}", i, args[i]);
 //        }
 
-        var gameLoop = gameLoopFactory.createGameLoop();
         gameLoop.run();
     }
 }

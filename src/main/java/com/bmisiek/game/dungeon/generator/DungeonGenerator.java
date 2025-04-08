@@ -1,8 +1,9 @@
 package com.bmisiek.game.dungeon.generator;
 
+import com.bmisiek.game.dungeon.Dungeon;
 import com.bmisiek.structures.Point;
 import com.bmisiek.game.config.GameConfigManager;
-import com.bmisiek.game.dungeon.DungeonInterface;
+import com.bmisiek.game.dungeon.DungeonManagerInterface;
 import com.bmisiek.game.dungeon.interfaces.RoomGeneratorInterface;
 import com.bmisiek.game.room.Room;
 import com.bmisiek.game.room.SpawnRoom;
@@ -90,7 +91,7 @@ public class DungeonGenerator {
     /*
       @param roomWeights Weighted map of allowed room classes
      */
-    public DungeonInterface createDungeon() {
+    public Dungeon createDungeon() {
         Point startPoint = new Point(0,0);
         CreateRooms(startPoint);
 

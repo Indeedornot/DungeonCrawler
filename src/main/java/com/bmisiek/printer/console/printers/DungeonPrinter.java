@@ -2,7 +2,7 @@ package com.bmisiek.printer.console.printers;
 
 import com.bmisiek.structures.Point;
 import com.bmisiek.game.dungeon.Dungeon;
-import com.bmisiek.game.dungeon.DungeonInterface;
+import com.bmisiek.game.dungeon.DungeonManagerInterface;
 import com.bmisiek.game.room.NullRoom;
 import com.bmisiek.game.room.Room;
 import com.bmisiek.printer.console.printers.room.Room3x3;
@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 @Service
-public class DungeonPrinter implements PrinterInterface<DungeonInterface> {
+public class DungeonPrinter implements PrinterInterface<DungeonManagerInterface> {
 
     private static final int ROOM_HEIGHT = 3; // Based on Room3x3
     private static final int ROOM_WIDTH = 3;  // Based on Room3x3
@@ -39,7 +39,7 @@ public class DungeonPrinter implements PrinterInterface<DungeonInterface> {
     }
 
     @Override
-    public void Print(DungeonInterface dungeon) {
+    public void Print(DungeonManagerInterface dungeon) {
         if (dungeon == null || dungeon.getRooms().isEmpty()) {
             System.out.println("Dungeon is empty.");
             return;
@@ -67,7 +67,7 @@ public class DungeonPrinter implements PrinterInterface<DungeonInterface> {
     /**
      * Calculates the boundaries and dimensions of the dungeon layout.
      */
-    private DungeonLayoutInfo calculateLayoutInfo(DungeonInterface dungeon) {
+    private DungeonLayoutInfo calculateLayoutInfo(DungeonManagerInterface dungeon) {
         Map<Point, Room> rooms = dungeon.getRooms();
 
         int minX = rooms.keySet().stream().mapToInt(Point::getX).min().orElse(0);
@@ -88,7 +88,7 @@ public class DungeonPrinter implements PrinterInterface<DungeonInterface> {
      * Coordinates are adjusted so the top-left room is at grid position (0,0).
      * Empty spaces in the grid are filled with NullRoom representations.
      */
-    private Grid<Room3x3> createRoomGrid(DungeonInterface dungeon, DungeonLayoutInfo layoutInfo) {
+    private Grid<Room3x3> createRoomGrid(DungeonManagerInterface dungeon, DungeonLayoutInfo layoutInfo) {
         Grid<Room3x3> grid = new Grid<>(Room3x3.class, layoutInfo.gridWidth(), layoutInfo.gridHeight());
         Point offset = layoutInfo.topLeft(); // Use this point to adjust coordinates
 

@@ -1,14 +1,14 @@
 package com.bmisiek.printer.console.printers;
 
 import com.bmisiek.structures.Point;
-import com.bmisiek.game.dungeon.DungeonInterface;
+import com.bmisiek.game.dungeon.DungeonManagerInterface;
 import com.bmisiek.structures.RangeExtension;
 import lombok.Getter;
 import org.springframework.data.domain.Range;
 
 @Getter
 public class DungeonInfo {
-    private final DungeonInterface dungeon;
+    private final DungeonManagerInterface dungeon;
 
     private Range<Integer> xBound;
     private int xSize;
@@ -18,7 +18,7 @@ public class DungeonInfo {
 
     private final Point furthestPoint;
 
-    public DungeonInfo(DungeonInterface dungeon) {
+    public DungeonInfo(DungeonManagerInterface dungeon) {
         this.dungeon = dungeon;
         this.calculateGridSpan(dungeon);
         this.xSize = RangeExtension.getLength(this.xBound);
@@ -26,7 +26,7 @@ public class DungeonInfo {
         this.furthestPoint = new Point(xBound.getLowerBound().getValue().orElseThrow(), yBound.getLowerBound().getValue().orElseThrow());
     }
 
-    private void calculateGridSpan(DungeonInterface dungeon) {
+    private void calculateGridSpan(DungeonManagerInterface dungeon) {
         var keyStream = dungeon.getRooms().keySet();
 
         var xs = keyStream.stream().map(Point::getX).sorted().toList();

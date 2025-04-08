@@ -25,7 +25,9 @@ public class PlayerManager {
     public void takeDamage(@NotNull Player player, int damage) {
         player.setHealth(player.getHealth() - damage);
         applicationEventPublisher.publishEvent(new DamageTakenEvent(this, new DamageTakenEventData(player, damage)));
-        applicationEventPublisher.publishEvent(new PlayerDiedEvent(this, new PlayerEventData(player)));
+        if(player.getHealth() <= 0) {
+            applicationEventPublisher.publishEvent(new PlayerDiedEvent(this, new PlayerEventData(player)));
+        }
     }
 
     public void heal(@NotNull Player player, int heal) {

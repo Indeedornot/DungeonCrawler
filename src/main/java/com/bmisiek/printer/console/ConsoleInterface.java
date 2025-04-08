@@ -1,10 +1,7 @@
 package com.bmisiek.printer.console;
 
-import com.bmisiek.game.dungeon.DungeonInterface;
-import com.bmisiek.game.event.DamageTakenEvent;
-import com.bmisiek.game.event.DungeonEnteredEvent;
-import com.bmisiek.game.event.HealedEvent;
-import com.bmisiek.game.event.data.HealedEventData;
+import com.bmisiek.game.dungeon.DungeonManagerInterface;
+import com.bmisiek.game.event.*;
 import com.bmisiek.game.player.Player;
 import com.bmisiek.printer.console.printers.DungeonPlayerPrinter;
 import com.bmisiek.printer.console.printers.DungeonPrinter;
@@ -49,14 +46,18 @@ public class ConsoleInterface implements GuiInterface, ApplicationListener<Appli
         PrintNewLines(2);
     }
 
-    public void Update(@NotNull DungeonInterface dungeon) {
+    private void DumpMessageQueue() {
+        messageQueue.forEach(System.out::println);
+        messageQueue.clear();
+    }
+
+    public void Update(@NotNull DungeonManagerInterface dungeon) {
         dungeonPrinter.Print(dungeon);
         for(var player: dungeon.getPlayers()){
             dungeonPlayerPrinter.Print(dungeon, player);
         }
-        messageQueue.forEach(System.out::println);
-        messageQueue.clear();
 
+        DumpMessageQueue();
         PrintUpdateSeparator();
     }
 
@@ -67,7 +68,7 @@ public class ConsoleInterface implements GuiInterface, ApplicationListener<Appli
         put("left", GameAction.MOVE_LEFT);
     }};
 
-    public GameAction Act(DungeonInterface dungeon, Player player) throws RuntimeException {
+    public GameAction Act(DungeonManagerInterface dungeon, Player player) throws RuntimeException {
         Scanner scanner = new Scanner(System.in);
         while (true) {
             try {
@@ -106,6 +107,8 @@ public class ConsoleInterface implements GuiInterface, ApplicationListener<Appli
             case DungeonEnteredEvent dungeonEnteredEvent -> onDungeonEnteredEvent(dungeonEnteredEvent);
             case DamageTakenEvent damageTakenEvent -> onDamageTakenEvent(damageTakenEvent);
             case HealedEvent healedEvent -> onHealedEvent(healedEvent);
+            case PlayerDiedEvent diedEvent -> onDiedEvent(diedEvent);
+            case DungeonEmptyEvent dungeonEmptyEvent -> onDungeonEmptyEvent(dungeonEmptyEvent);
             default -> {}
         }
     }
@@ -120,5 +123,14 @@ public class ConsoleInterface implements GuiInterface, ApplicationListener<Appli
 
     private void onHealedEvent(HealedEvent event) {
         messageQueue.add(MessageFormat.format("Player has gained additional {0} health", event.getEventData().getHeal()));
+    }
+
+    private void onDiedEvent(PlayerDiedEvent event) {
+        messageQueue.add("Player died");
+    }
+
+    private void onDungeonEmptyEvent(DungeonEmptyEvent event) {
+        DumpMessageQueue();
+        System.out.println("Dungeon is empty");
     }
 }
