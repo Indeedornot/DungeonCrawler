@@ -2,8 +2,10 @@ package com.bmisiek.game.dungeon;
 
 import com.bmisiek.game.basic.Point;
 import com.bmisiek.game.event.DungeonEmptyEvent;
+import com.bmisiek.game.event.DungeonEnteredEvent;
 import com.bmisiek.game.event.PlayerDiedEvent;
 import com.bmisiek.game.event.PlayerMovedEvent;
+import com.bmisiek.game.event.data.DungeonEnteredEventData;
 import com.bmisiek.game.event.data.PlayerMovedEventData;
 import com.bmisiek.game.exception.InvalidActionException;
 import com.bmisiek.game.player.Player;
@@ -26,13 +28,14 @@ public class Dungeon implements ApplicationListener<PlayerDiedEvent>, DungeonInt
      */
     private final Map<Player, Point> players;
 
-    private Point startPoint;
+    private final Point startPoint;
 
     private final ApplicationEventPublisher applicationEventPublisher;
 
     public Dungeon(ApplicationEventPublisher applicationEventPublisher, Map<Point, Room> rooms, Point startPoint) {
         this.applicationEventPublisher = applicationEventPublisher;
         this.rooms = rooms;
+        this.startPoint = startPoint;
 
         if(rooms.isEmpty()) {
             throw new IllegalArgumentException("No rooms could be created.");
@@ -47,6 +50,7 @@ public class Dungeon implements ApplicationListener<PlayerDiedEvent>, DungeonInt
 
     public void enter(Player player) {
         this.players.put(player, startPoint);
+        applicationEventPublisher.publishEvent(new DungeonEnteredEvent(this, new DungeonEnteredEventData(player)));
     }
 
     private boolean roomExists(Point point) {
@@ -80,6 +84,11 @@ public class Dungeon implements ApplicationListener<PlayerDiedEvent>, DungeonInt
     @Override
     public List<Player> getPlayers() {
         return players.keySet().stream().toList();
+    }
+
+    @Override
+    public Map<Point, Room> getRooms() {
+       return rooms;
     }
 
     public Point getPosition(Player player) {

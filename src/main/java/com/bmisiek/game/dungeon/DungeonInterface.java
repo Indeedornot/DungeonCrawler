@@ -3,8 +3,11 @@ package com.bmisiek.game.dungeon;
 import com.bmisiek.game.basic.Point;
 import com.bmisiek.game.exception.InvalidActionException;
 import com.bmisiek.game.player.Player;
+import com.bmisiek.game.room.Room;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public interface DungeonInterface {
     void enter(Player player);
@@ -14,4 +17,6 @@ public interface DungeonInterface {
     void tryMove(Player player, Point point) throws InvalidActionException;
 
     List<Player> getPlayers();
+
+    Map<Point, Room> getRooms();
 }

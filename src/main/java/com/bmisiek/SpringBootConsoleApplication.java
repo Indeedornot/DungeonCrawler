@@ -1,5 +1,6 @@
 package com.bmisiek;
 
+import com.bmisiek.game.gameloop.GameLoopFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
@@ -12,6 +13,12 @@ public class SpringBootConsoleApplication implements CommandLineRunner {
     private static final Logger LOG = LoggerFactory
             .getLogger(SpringBootConsoleApplication.class);
 
+    private final GameLoopFactory gameLoopFactory;
+
+    public SpringBootConsoleApplication(GameLoopFactory gameLoopFactory) {
+        this.gameLoopFactory = gameLoopFactory;
+    }
+
     public static void main(String[] args) {
         LOG.info("STARTING THE APPLICATION");
         SpringApplication.run(SpringBootConsoleApplication.class, args);
@@ -20,10 +27,13 @@ public class SpringBootConsoleApplication implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        LOG.info("EXECUTING : command line runner");
+//        LOG.info("EXECUTING : command line runner");
+//
+//        for (int i = 0; i < args.length; ++i) {
+//            LOG.info("args[{}]: {}", i, args[i]);
+//        }
 
-        for (int i = 0; i < args.length; ++i) {
-            LOG.info("args[{}]: {}", i, args[i]);
-        }
+        var gameLoop = gameLoopFactory.createGameLoop();
+        gameLoop.run();
     }
 }
