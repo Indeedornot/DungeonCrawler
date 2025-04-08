@@ -5,7 +5,9 @@ import com.bmisiek.game.dungeon.interfaces.RoomGeneratorInterface;
 import com.bmisiek.game.room.Room;
 import com.bmisiek.game.room.RoomFactory;
 import lombok.Setter;
+import lombok.SneakyThrows;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -82,6 +84,7 @@ class RoomGenerator implements RoomGeneratorInterface {
         return possibleRooms.getLast().getKey();
     }
 
+    @SneakyThrows
     public Room createRoomAt(Point point) {
         Class<? extends Room> roomClass = getRandomRoomClass(point);
         return (roomClass != null) ? roomFactory.createRoom(roomClass) : null;

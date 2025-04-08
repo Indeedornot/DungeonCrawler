@@ -1,6 +1,7 @@
 package com.bmisiek.printer.console.printers.room;
 
 import com.bmisiek.game.exception.InvalidActionException;
+import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
 

@@ -4,10 +4,8 @@ import com.bmisiek.game.player.Player;
 import com.bmisiek.game.player.PlayerManager;
 
 public class CorridorRoom extends Room {
-    private final PlayerManager playerManager;
 
-    public CorridorRoom(PlayerManager playerManager) {
-        this.playerManager = playerManager;
+    public CorridorRoom() {
     }
 
     @Override
