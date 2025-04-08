@@ -11,6 +11,8 @@ public class DungeonPlayerPrinter {
 
     public void Print(DungeonInterface dungeon, Player player) {
         var playerPosition = dungeon.getPosition(player);
-        System.out.println("Player position: " + playerPosition);
+        System.out.println("Player info: ");
+        System.out.println(" position: " + playerPosition);
+        System.out.println(" health: " + player.getHealth());
     }
 }

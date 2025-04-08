@@ -11,5 +11,6 @@ class GamePlayer extends Player {
 
     GamePlayer(int identifier, int health) {
         this.identifier = identifier;
+        this.health = health;
     }
 }
