@@ -1,8 +1,9 @@
 package com.bmisiek.structures.grid;
 
 import java.util.Iterator;
+import java.util.Optional;
 
-public class RowIterator<T> implements Iterator<T[]> {
+public class RowIterator<T> implements Iterator<Optional<T>[]> {
     private final Grid<T> grid;
     int yIdx = 0;
 
@@ -16,8 +17,8 @@ public class RowIterator<T> implements Iterator<T[]> {
     }
 
     @Override
-    public T[] next() {
-        var row = grid.GetRow(yIdx);
+    public Optional<T>[] next() {
+        var row = grid.getRow(yIdx);
         yIdx++;
         return row;
     }
