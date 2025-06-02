@@ -80,6 +80,21 @@ public class DungeonManager implements ApplicationListener<PlayerDiedEvent>, Dun
     }
 
     @Override
+    public void searchRoom() throws InvalidActionException {
+        assert this.dungeon.player != null;
+        Point currentLocation = this.dungeon.player.getSecond();
+        Room currentRoom = this.dungeon.rooms.get(currentLocation);
+
+        if (!currentRoom.HasAdditionalActions()) {
+            throw new InvalidActionException("There is nothing to search for in this room");
+        }
+
+        currentRoom.PerformAdditionalAction(getPlayer());
+
+        // ItemFoundEvent is published by the TreasureRoom when an item is found
+    }
+
+    @Override
     public Player getPlayer() {
         assert dungeon.player != null;
         return dungeon.player.getFirst();

@@ -15,6 +15,8 @@ public interface DungeonManagerInterface {
     Point getPlayerPosition();
 
     void tryMove(Point point) throws InvalidActionException;
+    
+    void searchRoom() throws InvalidActionException;
 
     Player getPlayer();
 
