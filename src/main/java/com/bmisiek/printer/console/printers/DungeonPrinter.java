@@ -1,5 +1,6 @@
 package com.bmisiek.printer.console.printers;
 
+import com.bmisiek.structures.IteratorExtension;
 import com.bmisiek.structures.Point;
 import com.bmisiek.game.dungeon.Dungeon;
 import com.bmisiek.game.dungeon.DungeonManagerInterface;
@@ -8,16 +9,11 @@ import com.bmisiek.game.room.Room;
 import com.bmisiek.printer.console.printers.room.Room3x3;
 import com.bmisiek.printer.contract.PrinterInterface;
 import com.bmisiek.structures.grid.Grid;
-import com.bmisiek.structures.IteratorExtension;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 @Service
 public class DungeonPrinter implements PrinterInterface<DungeonManagerInterface> {
@@ -25,7 +21,7 @@ public class DungeonPrinter implements PrinterInterface<DungeonManagerInterface>
     private static final int ROOM_HEIGHT = 3; // Based on Room3x3
     private static final int ROOM_WIDTH = 3;  // Based on Room3x3
     private static final int COORDINATE_AXIS_PADDING = 5; // Space reserved for Y-axis labels
-    private static final String LINE_SEPARATOR = "\n";
+    private static final String LINE_SEPARATOR = System.lineSeparator(); // Use system-specific separator
 
     private final RoomPrinter roomPrinter;
 
@@ -43,21 +39,199 @@ public class DungeonPrinter implements PrinterInterface<DungeonManagerInterface>
         DungeonLayoutInfo layoutInfo = calculateLayoutInfo(dungeon);
 
         Grid<Room3x3> roomGrid = createRoomGrid(dungeon, layoutInfo);
-        List<String> printLines = assemblePrintLines(roomGrid);
 
-        AddCoordinateLabels(printLines, layoutInfo);
+        // Convert Room representations to their multi-line String representations
+        Grid<String> printStringGrid = assemblePrintStringGrid(roomGrid);
 
-        printLines.forEach(System.out::println);
+        // Add coordinate labels BEFORE processing rows for printing
+        Grid<String> labeledStringGrid = addCoordinateLabels(printStringGrid, layoutInfo);
+
+        // --- Printing Logic ---
+        // Get rows from the final grid (including labels)
+        String[][] rows = IteratorExtension.toStream(labeledStringGrid.getRows())
+                .map(row -> Arrays.stream(row)
+                        .map(Optional::orElseThrow)
+                        .toArray(String[]::new)
+                )
+                .toArray(String[][]::new);
+
+        // Iterate through the rows of cells (each cell contains a potentially multi-line string)
+        for (String[] rowOfCells : rows) {
+            String[] cellStrings = Arrays.stream(rowOfCells).toArray(String[]::new);
+
+            int maxLinesInRow = Arrays.stream(cellStrings)
+                    .mapToInt(s -> s.lines().toArray().length) // Count actual lines
+                    .max()
+                    .orElse(1); // Default to 1 line if row is empty or all cells are empty strings
+
+            List<List<String>> processedCells = Arrays.stream(cellStrings)
+                    .map(cellStr -> centerVertically(cellStr, maxLinesInRow, guessCellWidth(cellStr))) // Pass cell width
+                    .toList();
+
+            // Print the row line by line
+            for (int lineIndex = 0; lineIndex < maxLinesInRow; lineIndex++) {
+                for (List<String> cellLines : processedCells) {
+                    // Print the specific line for this cell
+                    // If a cell somehow ended up with fewer lines than maxLinesInRow after centering
+                    // (shouldn't happen with correct centerVertically), print empty string.
+                    System.out.print(lineIndex < cellLines.size() ? cellLines.get(lineIndex) : "");
+                }
+                System.out.println(); // Move to the next line of output
+            }
+        }
     }
 
-    private void AddCoordinateLabels(List<String> printLines, DungeonLayoutInfo layoutInfo) {
-        addYAxisLabels(printLines, layoutInfo);
-        AddXAxisLabels(printLines, layoutInfo);
+    /**
+     * Guesses the intended width for a cell based on its content.
+     * Assumes fixed width (ROOM_WIDTH) for room cells and COORDINATE_AXIS_PADDING for the first column.
+     * This is a heuristic and might need refinement based on actual grid structure.
+     * NOTE: This approach is brittle. A better way would be to store width information alongside the string in the grid.
+     */
+     private int guessCellWidth(String cellContent) {
+        // Basic check: if content looks like a coordinate label (mostly spaces, maybe a number)
+        // use COORDINATE_AXIS_PADDING. Otherwise, assume ROOM_WIDTH.
+        // This might fail if room content is just spaces or numbers.
+         String trimmed = cellContent.trim();
+         boolean possiblyCoordinate = trimmed.matches("-?\\d*") || trimmed.isEmpty();
+
+         // A more robust check might involve knowing the column index, but printRow doesn't have it.
+         // Let's assume for now: If it has multiple lines or typical room characters, it's a room.
+         if (cellContent.lines().count() > 1 || cellContent.contains("#") || cellContent.contains(".") /* add other room chars */ ) {
+             return ROOM_WIDTH;
+         } else if (possiblyCoordinate && cellContent.length() <= COORDINATE_AXIS_PADDING ) {
+             // If it might be a coordinate and fits the padding width, assume it is.
+             return COORDINATE_AXIS_PADDING;
+         }
+         // Default assumption if unsure
+         return ROOM_WIDTH;
+     }
+
+
+    /**
+     * Centers a multi-line string vertically within a total number of lines (maxLines).
+     * Also ensures each line is horizontally centered within the specified cellWidth.
+     * Returns the result as a List of strings (each element is one line).
+     */
+    private static List<String> centerVertically(String content, int maxLines, int cellWidth) {
+        List<String> originalLines = content.lines().toList();
+        int numOriginalLines = originalLines.size();
+
+        if (numOriginalLines >= maxLines) {
+            // Already meets or exceeds max lines, just ensure horizontal centering
+            return originalLines.stream()
+                    .limit(maxLines) // Truncate if needed (though ideally shouldn't happen)
+                    .map(line -> centerHorizontally(line, cellWidth))
+                    .collect(Collectors.toList());
+        }
+
+        int paddingTop = (maxLines - numOriginalLines) / 2;
+        int paddingBottom = maxLines - numOriginalLines - paddingTop;
+
+        List<String> resultLines = new ArrayList<>(maxLines);
+        String emptyPaddedLine = centerHorizontally("", cellWidth); // Pre-calculate empty centered line
+
+        // Add top padding lines
+        for (int i = 0; i < paddingTop; i++) {
+            resultLines.add(emptyPaddedLine);
+        }
+
+        // Add original content lines (horizontally centered)
+        for (String line : originalLines) {
+            resultLines.add(centerHorizontally(line, cellWidth));
+        }
+
+        // Add bottom padding lines
+        for (int i = 0; i < paddingBottom; i++) {
+            resultLines.add(emptyPaddedLine);
+            }
+
+        return resultLines;
+        }
+
+    /**
+     * Centers a single string horizontally within a given maximum width.
+     */
+    private static @NotNull String centerHorizontally(String label, int maxWidth) {
+        if (label == null) label = "";
+        int labelLength = label.length();
+        if (labelLength >= maxWidth) {
+            return label.substring(0, maxWidth); // Truncate if too long
+        }
+
+        int paddingTotal = maxWidth - labelLength;
+        int paddingLeft = paddingTotal / 2;
+        int paddingRight = paddingTotal - paddingLeft; // Ensures total width is maxWidth
+
+        // Consider using String.format for potentially cleaner padding
+        return " ".repeat(paddingLeft) + label + " ".repeat(paddingRight);
+    }
+
+    private Grid<String> addCoordinateLabels(Grid<String> printStringGrid, DungeonLayoutInfo layoutInfo) {
+        // Create a new grid large enough for labels + original content
+        int maxLinesAcrossAllCells = 0;
+        for (int y = 0; y < printStringGrid.getYSize(); y++) {
+             for (int x = 0; x < printStringGrid.getXSize(); x++) {
+                 Optional<String> cellOpt = printStringGrid.getAt(x, y);
+                 if (cellOpt.isPresent()) {
+                     maxLinesAcrossAllCells = Math.max(maxLinesAcrossAllCells, (int) cellOpt.get().lines().count());
+                 }
+             }
+        }
+        int effectiveRoomHeight = (maxLinesAcrossAllCells == 0) ? ROOM_HEIGHT : maxLinesAcrossAllCells;
+
+        // --- Add Y-Axis Labels (inserting a column) ---
+        Grid<String> gridWithY = new Grid<>(String.class, printStringGrid.getXSize() + 1, printStringGrid.getYSize());
+        gridWithY.insertSubgrid(1, 0, printStringGrid); // Shift original content right
+
+        // Add Y labels centered vertically within each room's assumed height
+        int roomCenterLineOffset = effectiveRoomHeight / 2; // Line index within a room block for the label
+
+        for (int roomY = 0; roomY < gridWithY.getYSize(); roomY++) {
+            // Calculate the actual Y coordinate in the dungeon space
+            int dungeonY = layoutInfo.topLeft().getY() + roomY;
+            String yLabel = String.valueOf(dungeonY);
+            String centeredYLabel = centerHorizontally(yLabel, COORDINATE_AXIS_PADDING);
+
+            // We need to pad the label string vertically to match the room height
+            // Pad the single centered label line to match 'effectiveRoomHeight'
+            List<String> paddedLabelLines = new ArrayList<>();
+            int labelTopPad = roomCenterLineOffset;
+            int labelBottomPad = effectiveRoomHeight - 1 - labelTopPad;
+            String emptyPaddedLine = centerHorizontally("", COORDINATE_AXIS_PADDING);
+
+            for(int i=0; i<labelTopPad; i++) paddedLabelLines.add(emptyPaddedLine);
+            paddedLabelLines.add(centeredYLabel);
+            for(int i=0; i<labelBottomPad; i++) paddedLabelLines.add(emptyPaddedLine);
+
+            // Combine into a single multi-line string for the grid cell
+            String finalLabelCell = String.join(LINE_SEPARATOR, paddedLabelLines);
+            gridWithY.setAt(0, roomY, finalLabelCell);
+        }
+
+        // --- Add X-Axis Labels (inserting a row) ---
+        Grid<String> finalGrid = new Grid<>(String.class, gridWithY.getXSize(), gridWithY.getYSize() + 1);
+        finalGrid.insertSubgrid(0, 1, gridWithY); // Shift content down
+
+        // Add empty top-left corner (padded to Y-axis width)
+        // This also needs vertical padding to match the X-axis label row height (assume 1 line)
+        finalGrid.setAt(0, 0, centerHorizontally("", COORDINATE_AXIS_PADDING));
+
+        // Add X labels centered horizontally within each room's width
+        for (int roomX = 0; roomX < printStringGrid.getXSize(); roomX++) { // Iterate original width
+            int dungeonX = layoutInfo.topLeft().getX() + roomX;
+            String xLabel = String.valueOf(dungeonX);
+            // The cell index in finalGrid is roomX + 1 (due to Y-axis column)
+            // Labels go in row 0.
+            finalGrid.setAt(roomX + 1, 0, centerHorizontally(xLabel, ROOM_WIDTH));
+    }
+
+        return finalGrid;
     }
 
     private DungeonLayoutInfo calculateLayoutInfo(DungeonManagerInterface dungeon) {
         Map<Point, Room> rooms = dungeon.getRooms();
 
+        // Use Optional for safety in case stream is empty (though checked above)
         int minX = rooms.keySet().stream().mapToInt(Point::getX).min().orElse(0);
         int maxX = rooms.keySet().stream().mapToInt(Point::getX).max().orElse(0);
         int minY = rooms.keySet().stream().mapToInt(Point::getY).min().orElse(0);
@@ -90,7 +264,7 @@ public class DungeonPrinter implements PrinterInterface<DungeonManagerInterface>
 
             Room3x3 roomRepresentation = roomPrinter.Print(room); // Assuming RoomPrinter returns Room3x3
             grid.setAt(gridPoint, roomRepresentation);
-    }
+        }
 
         // Fill empty cells with NullRoom representations
         fillEmptyGridCells(grid, layoutInfo);
@@ -102,10 +276,15 @@ public class DungeonPrinter implements PrinterInterface<DungeonManagerInterface>
      * Fills any empty cells in the grid with the representation of a NullRoom.
      */
     private void fillEmptyGridCells(Grid<Room3x3> grid, DungeonLayoutInfo layoutInfo) {
-        Room3x3 nullRoomRepresentation = roomPrinter.Print(new NullRoom());
+        // Avoid creating representation repeatedly if it's always the same
+        Room3x3 nullRoomRepresentation = null; // Lazy initialize
+
         for (int y = 0; y < layoutInfo.gridHeight(); y++) {
             for (int x = 0; x < layoutInfo.gridWidth(); x++) {
                 if (!grid.has(x, y)) {
+                    if (nullRoomRepresentation == null) {
+                        nullRoomRepresentation = roomPrinter.Print(new NullRoom());
+                    }
                     grid.setAt(x, y, nullRoomRepresentation);
                 }
             }
@@ -113,101 +292,23 @@ public class DungeonPrinter implements PrinterInterface<DungeonManagerInterface>
     }
 
     /**
-     * Assembles the multi-line string output for the entire grid, row by row.
+    * Converts the grid of Room representations (Room3x3) into a grid of their
+    * corresponding multi-line String representations.
      */
-    private List<String> assemblePrintLines(Grid<Room3x3> roomGrid) {
-         // Assuming grid.GetRows() returns an Iterable<Room3x3[]> or similar
-        return IteratorExtension.toStream(roomGrid.GetRows()) // Keep using custom extension if necessary
-                .map(this::formatRoomRowAsString)
-                .collect(Collectors.toCollection(ArrayList::new)); // Use ArrayList for addFirst later
-    }
-
-    /**
-     * Formats a single row of rooms (Room3x3[]) into a multi-line string.
-     * Example for a row of 3 rooms:
-     * room1_line0 + room2_line0 + room3_line0 + "\n" +
-     * room1_line1 + room2_line1 + room3_line1 + "\n" +
-     * room1_line2 + room2_line2 + room3_line2
-     */
-    private String formatRoomRowAsString(Room3x3[] roomRow) {
-        return IntStream.range(0, ROOM_HEIGHT) // Iterate through 0, 1, 2 for a 3x3 room
-                .mapToObj(subRowIndex -> formatSingleLineAcrossRooms(roomRow, subRowIndex))
-                .collect(Collectors.joining(LINE_SEPARATOR));
-    }
-
-    /**
-     * Creates a single line of text by concatenating the corresponding subline
-     * from each room in the row.
-     * Example: Get line 1 from room1, line 1 from room2, line 1 from room3 and join them.
-     */
-    private String formatSingleLineAcrossRooms(Room3x3[] roomRow, int subRowIndex) {
-        return Arrays.stream(roomRow)
-                .map(room -> String.join("", room.GetRow(subRowIndex)))
-                .collect(Collectors.joining());
-    }
-
-    /**
-     * Adds Y-axis coordinate labels to the left of the print lines.
-     * Labels are aligned with the vertical center of each room row.
-     */
-    private void addYAxisLabels(List<String> printLines, DungeonLayoutInfo layoutInfo) {
-
-        for (int gridRowIndex = 0; gridRowIndex < printLines.size(); gridRowIndex++) {
-            AddYAxisLabel(printLines, layoutInfo, gridRowIndex);
-        }
-    }
-
-    private static void AddYAxisLabel(List<String> printLines, DungeonLayoutInfo layoutInfo, int gridRowIndex) {
-        int middleLineIndexInRoom = ROOM_HEIGHT / 2;
-        String verticalPadding = " ".repeat(COORDINATE_AXIS_PADDING);
-
-        //Retrieve original Y index by reversing adjustment
-        int originalY = layoutInfo.topLeft().getY() + gridRowIndex;
-
-        String yLabel = String.valueOf(originalY);
-        String labelLinePrefix = CenterLine(yLabel, COORDINATE_AXIS_PADDING);
-
-        // Split the multi-line room row string
-        String[] subLines = printLines.get(gridRowIndex).split(LINE_SEPARATOR, -1);
-
-        // Apply padding/label
-        subLines = Arrays.stream(subLines).map(line -> verticalPadding + line).toArray(String[]::new);
-        subLines[middleLineIndexInRoom] = subLines[middleLineIndexInRoom].replace(verticalPadding, labelLinePrefix);
-
-        // Join back and update the list
-        printLines.set(gridRowIndex, String.join(LINE_SEPARATOR, subLines));
-    }
-
-    private static @NotNull String CenterLine(String yLabel, int maxWidth) {
-        int paddingLeft = (maxWidth - yLabel.length()) / 2;
-        int paddingRight = maxWidth - yLabel.length() - paddingLeft;
-        return " ".repeat(paddingLeft) + yLabel + " ".repeat(paddingRight);
-    }
-
-    /**
-     * Adds an X-axis coordinate label row at the top of the print lines.
-     * Labels are centered above each room column.
-     */
-     private void AddXAxisLabels(List<String> printLines, DungeonLayoutInfo layoutInfo) {
-        StringBuilder header = new StringBuilder();
-        header.append(" ".repeat(COORDINATE_AXIS_PADDING)); // Initial padding to align with Y labels
-
-        for (int gridColIndex = 0; gridColIndex < layoutInfo.gridWidth(); gridColIndex++) {
-            // Calculate original X coordinate by reversing mapping
-            int originalX = layoutInfo.topLeft().getX() + gridColIndex;
-
-            String xLabel = String.valueOf(originalX);
-
-            // Basic centering: Add padding before the label within the space for one room column
-            int totalPaddingNeeded = ROOM_WIDTH - xLabel.length();
-            int leftPadding = totalPaddingNeeded / 2;
-            int rightPadding = totalPaddingNeeded - leftPadding; // Accounts for odd/even total padding
-
-            header.append(" ".repeat(leftPadding));
-            header.append(xLabel);
-            header.append(" ".repeat(rightPadding));
+    private Grid<String> assemblePrintStringGrid(Grid<Room3x3> roomGrid) {
+        Grid<String> result = new Grid<>(String.class, roomGrid.getXSize(), roomGrid.getYSize());
+         for (int y = 0; y < roomGrid.getYSize(); y++) {
+             for (int x = 0; x < roomGrid.getXSize(); x++) {
+                 result.setAt(x, y, roomGrid.getAt(x, y).orElseThrow().toString()); // Handle missing/null case
+            }
         }
 
-        printLines.addFirst(header.toString());
+        return result;
+    }
+
+    private static @NotNull String CenterHorizontally(String label, int maxWidth) {
+        int paddingLeft = (maxWidth - label.length()) / 2;
+        int paddingRight = maxWidth - label.length() - paddingLeft;
+        return " ".repeat(paddingLeft) + label + " ".repeat(paddingRight);
     }
 }
