@@ -30,7 +30,7 @@ public class Point {
         return new Point(this.x + point.x, this.y + point.y);
     }
 
-    public Point substract(Point point) {
+    public Point subtract(Point point) {
         return new Point(this.x - point.x, this.y - point.y);
     }
 
@@ -58,8 +58,8 @@ public class Point {
         return Objects.hash(x, y);
     }
 
-    public static Point Right = new Point(1, 0);
-    public static Point Left = new Point(-1, 0);
-    public static Point Up = new Point(0, -1);
-    public static Point Down = new Point(0, 1);
+    public static final Point Right = new Point(1, 0);
+    public static final Point Left = new Point(-1, 0);
+    public static final Point Up = new Point(0, -1);
+    public static final Point Down = new Point(0, 1);
 }

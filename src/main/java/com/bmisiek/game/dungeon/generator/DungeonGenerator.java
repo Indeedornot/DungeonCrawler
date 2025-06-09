@@ -3,7 +3,6 @@ package com.bmisiek.game.dungeon.generator;
 import com.bmisiek.game.dungeon.Dungeon;
 import com.bmisiek.structures.Point;
 import com.bmisiek.game.config.GameConfigManager;
-import com.bmisiek.game.dungeon.DungeonManagerInterface;
 import com.bmisiek.game.dungeon.interfaces.RoomGeneratorInterface;
 import com.bmisiek.game.room.Room;
 import com.bmisiek.game.room.SpawnRoom;
@@ -81,16 +80,13 @@ public class DungeonGenerator {
 
     }
 
-    /*
-        If there are issues with creating rooms from other entrypoint, find a new one
+    /**
+     *   If there are issues with creating rooms from other entrypoint, find a new one
      */
-    private Point getNewEntrypoint(Point currentPoint) {
+    private Point getNewEntrypoint() {
         return rooms.keySet().toArray(new Point[0])[random.nextInt(rooms.size())];
     }
 
-    /*
-      @param roomWeights Weighted map of allowed room classes
-     */
     public Dungeon createDungeon() {
         Point startPoint = new Point(0,0);
         CreateRooms(startPoint);
@@ -107,7 +103,7 @@ public class DungeonGenerator {
         for (int i = 1; i < roomCount; i++) {
             currentPoint = tryCreateNextRoomFrom(currentPoint);
             if(currentPoint == null) {
-                currentPoint = getNewEntrypoint(currentPoint);
+                currentPoint = getNewEntrypoint();
                 i--;
             }
         }

@@ -1,7 +1,6 @@
 package com.bmisiek.game.room;
 
 import com.bmisiek.game.player.Player;
-import com.bmisiek.game.player.PlayerManager;
 
 public class CorridorRoom extends Room {
 

@@ -17,7 +17,6 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -110,6 +109,7 @@ public class DungeonManager implements ApplicationListener<PlayerDiedEvent>, Dun
     public Map<Point, Room> getRooms() {
         return dungeon.rooms;
     }
+
     /**
      * Removes dead players
      */

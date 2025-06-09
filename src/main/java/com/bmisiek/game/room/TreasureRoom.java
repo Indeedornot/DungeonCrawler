@@ -12,21 +12,16 @@ import java.security.SecureRandom;
  * A room that contains treasure (items) that can be found
  */
 public class TreasureRoom extends Room {
-    private final ItemFactory itemFactory;
-    private final SecureRandom random = new SecureRandom();
-    
     @Getter
     private Item treasure;
     private boolean treasureFound = false;
     
     public TreasureRoom(ItemFactory itemFactory) {
-        this.itemFactory = itemFactory;
         this.treasure = itemFactory.createRandomItem();
     }
     
     @Override
     public void Act(Player player) {
-        // Nothing happens automatically when entering
     }
     
     @Override

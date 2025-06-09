@@ -1,7 +1,6 @@
 package com.bmisiek.printer.console.printers;
 
 import com.bmisiek.game.dungeon.DungeonManagerInterface;
-import com.bmisiek.game.player.Player;
 import org.springframework.stereotype.Service;
 
 @Service

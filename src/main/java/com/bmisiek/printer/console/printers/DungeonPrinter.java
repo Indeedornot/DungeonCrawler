@@ -229,7 +229,7 @@ public class DungeonPrinter implements PrinterInterface<DungeonManagerInterface>
             Point originalPoint = entry.getKey();
             Room room = entry.getValue();
 
-            Point gridPoint = originalPoint.substract(offsetTo0x0);
+            Point gridPoint = originalPoint.subtract(offsetTo0x0);
 
             Room3x3 roomRepresentation = roomPrinter.Print(room);
             grid.setAt(gridPoint, roomRepresentation);

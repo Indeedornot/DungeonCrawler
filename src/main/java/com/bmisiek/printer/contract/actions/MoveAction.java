@@ -21,7 +21,6 @@ public class MoveAction extends GameAction {
         return direction;
     }
     
-    // Static instances for common movements
     public static final MoveAction UP = new MoveAction("up", Point.Up);
     public static final MoveAction DOWN = new MoveAction("down", Point.Down);
     public static final MoveAction LEFT = new MoveAction("left", Point.Left);

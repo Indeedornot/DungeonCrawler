@@ -1,6 +1,5 @@
 package com.bmisiek.game.event;
 
-import com.bmisiek.game.dungeon.Dungeon;
 import com.bmisiek.game.event.data.DungeonEnteredEventData;
 import lombok.Getter;
 import org.springframework.context.ApplicationEvent;

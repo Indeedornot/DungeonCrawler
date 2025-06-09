@@ -14,6 +14,6 @@ public class InventoryAction extends GameAction {
     
     @Override
     public boolean consumesTurn() {
-        return false; // Inventory action doesn't consume a turn
+        return false;
     }
 }
