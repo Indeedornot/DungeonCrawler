@@ -32,8 +32,12 @@ class GamePlayer extends Player {
     }
 
     @Override
-    public boolean removeItem(Item item) {
-        return inventory.remove(item);
+    public void removeItem(Item item) {
+        if (!inventory.contains(item)) {
+            throw new IllegalArgumentException("Item not found in inventory: " + item);
+        }
+
+        inventory.remove(item);
     }
 
     @Override

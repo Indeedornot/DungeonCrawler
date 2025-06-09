@@ -22,7 +22,7 @@ public abstract class Player {
     /**
      * Remove an item from the player's inventory
      */
-    public abstract boolean removeItem(Item item);
+    public abstract void removeItem(Item item);
     
     /**
      * Get the healing amplifier multiplier
