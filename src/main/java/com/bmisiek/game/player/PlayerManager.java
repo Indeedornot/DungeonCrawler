@@ -31,23 +31,17 @@ public class PlayerManager {
         }
     }
 
-    /**
-     * Heal the player with amplification support
-     */
-    public void heal(@NotNull Player player, int heal) {
+    public void healDirectly(@NotNull Player player, int heal) {
+        heal(player, heal, false);
+    }
+
+    public void healWithAmplifier(@NotNull Player player, int heal) {
         heal(player, heal, true);
     }
-    
-    /**
-     * Heal the player with optional amplification
-     * @param applyAmplifier Whether to apply the healing amplifier
-     */
-    public void heal(@NotNull Player player, int heal, boolean applyAmplifier) {
-        int actualHeal = heal;
-        if (applyAmplifier) {
-            actualHeal = (int) Math.round(heal * player.getHealingAmplifier());
-        }
-        
+
+    private void heal(@NotNull Player player, int heal, boolean applyAmplifier) {
+        int actualHeal = (int) Math.round(heal * (applyAmplifier ? player.getHealingAmplifier() : 1));
+
         player.setHealth(player.getHealth() + actualHeal);
         applicationEventPublisher.publishEvent(new HealedEvent(this, new HealedEventData(player, actualHeal)));
     }

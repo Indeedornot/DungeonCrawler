@@ -15,7 +15,7 @@ public class HospitalRoom extends Room{
 
     @Override
     public void Act(Player player) {
-        playerManager.heal(player, 10);
+        playerManager.healWithAmplifier(player, 10);
     }
 
     @Override

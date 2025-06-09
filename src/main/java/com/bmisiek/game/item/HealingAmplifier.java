@@ -10,12 +10,12 @@ public class HealingAmplifier extends Item {
     
     @Override
     public boolean use(Player player) {
-        player.setHealingAmplifier(2.0); // Double healing
-        return false; // Not consumed on use
+        player.setHealingAmplifier(2.0);
+        return false;
     }
     
     @Override
     public boolean isConsumable() {
-        return false; // Can be used indefinitely
+        return false;
     }
 }
