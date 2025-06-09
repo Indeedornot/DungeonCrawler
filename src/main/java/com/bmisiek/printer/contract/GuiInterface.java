@@ -9,5 +9,5 @@ import com.bmisiek.game.player.Player;
 public interface GuiInterface {
     void Update(DungeonManagerInterface dungeon);
 
-    GameAction Act(DungeonManagerInterface dungeon, Player player) throws RuntimeException;
+    GameAction GetAction(DungeonManagerInterface dungeon, Player player) throws RuntimeException;
 }

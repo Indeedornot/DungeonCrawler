@@ -16,13 +16,7 @@ public class MoveAction extends GameAction {
     public String getCommandName() {
         return commandName;
     }
-    
-    @Override
-    public boolean isMovement() {
-        return true;
-    }
-    
-    @Override
+
     public Point getMovement() {
         return direction;
     }
