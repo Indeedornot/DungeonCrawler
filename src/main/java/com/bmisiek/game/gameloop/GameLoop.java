@@ -13,17 +13,29 @@ import com.bmisiek.printer.contract.actions.InventoryAction;
 import com.bmisiek.printer.contract.actions.MoveAction;
 import com.bmisiek.printer.contract.actions.SearchAction;
 import com.bmisiek.printer.contract.actions.UseItemAction;
+import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Consumer;
+
 @Service
 public class GameLoop implements ApplicationListener<DungeonEmptyEvent> {
     private final GuiInterface gui;
+
+    @Getter
     private final DungeonManagerInterface dungeonManager;
+
+    @Getter
     private final PlayerManager playerManager;
-    private boolean isCancelled = false;
+
+    @Getter
     private final Player player;
+
+    private boolean isCancelled = false;
 
     public GameLoop(
             GuiInterface gui,
@@ -46,27 +58,33 @@ public class GameLoop implements ApplicationListener<DungeonEmptyEvent> {
         while(!isCancelled) {
             this.gui.Update(dungeonManager);
             GameAction action;
-            
-            // Keep requesting actions until we get one that consumes a turn
+
             do {
-                action = this.gui.Act(dungeonManager, player);
+                action = this.gui.GetAction(dungeonManager, player);
                 handleAction(action);
             } while (!action.consumesTurn() && !isCancelled);
         }
     }
 
-    private void handleAction(GameAction action) {
+    private final Map<Class<?>, Consumer<GameAction>> actionHandlers = new HashMap<>() {{
+        put(MoveAction.class, action -> {
+            MoveAction moveAction = (MoveAction) action;
+            getDungeonManager().tryMove(moveAction.getMovement());
+        });
+        put(SearchAction.class, _ -> getDungeonManager().searchRoom());
+        put(UseItemAction.class, action -> {
+            UseItemAction useItemAction = (UseItemAction) action;
+            String result = getPlayerManager().useItem(getPlayer(), useItemAction.getItemIndex());
+            System.out.println(result);
+        });
+        put(InventoryAction.class, _ -> {});
+    }};
+
+    private void handleAction(@NotNull GameAction action) {
         try {
-            if (action.isMovement()) {
-                dungeonManager.tryMove(action.getMovement());
-            } else if (action instanceof SearchAction) {
-                dungeonManager.searchRoom();
-            } else if (action instanceof UseItemAction useItemAction) {
-                String result = playerManager.useItem(player, useItemAction.getItemIndex());
-                System.out.println(result);
-            } else if (action instanceof InventoryAction) {
-                // Inventory is handled directly in ConsoleInterface
-                // This is just a non-turn-consuming action
+            Consumer<GameAction> handler = actionHandlers.get(action.getClass());
+            if (handler != null) {
+                handler.accept(action);
             }
         } catch (InvalidActionException e) {
             System.out.println(e.getMessage());
