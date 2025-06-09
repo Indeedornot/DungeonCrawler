@@ -14,14 +14,10 @@ public abstract class Item {
     }
     
     /**
-     * Use this item on the player
      * @param player The player to use the item on
      * @return True if the item was consumed, false otherwise
      */
     public abstract boolean use(Player player);
     
-    /**
-     * Whether this item can be used multiple times
-     */
     public abstract boolean isConsumable();
 }
