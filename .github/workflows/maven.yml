@@ -35,10 +35,21 @@ jobs:
           cache: maven
       - name: Build with Maven
         run: mvn -B package --file pom.xml
-      - name: Run JAR to verify startup
+      - name: Run JAR and check for startup message
         run: |
           JAR_FILE=$(ls target/*.jar | head -n 1)
-          timeout 20s java -jar "$JAR_FILE"
+          (java -jar "$JAR_FILE" &)
+          PID=$!
+          SECONDS=0
+          while [ $SECONDS -lt 20 ]; do
+            if grep -q "Started" <(tail -n 20 nohup.out 2>/dev/null); then
+              kill $PID
+              exit 0
+            fi
+            sleep 1
+          done
+          kill $PID
+          exit 1
       - name: Upload JAR artifact
         uses: actions/upload-artifact@v4
         with:
