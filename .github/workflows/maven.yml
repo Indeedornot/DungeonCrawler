@@ -38,11 +38,11 @@ jobs:
       - name: Run JAR and check for startup message
         run: |
           JAR_FILE=$(ls target/*.jar | head -n 1)
-          (java -jar "$JAR_FILE" &)
+          nohup java -jar "$JAR_FILE" > nohup.out 2>&1 &
           PID=$!
           SECONDS=0
           while [ $SECONDS -lt 20 ]; do
-            if grep -q "Started" <(tail -n 20 nohup.out 2>/dev/null); then
+            if grep -q "Started" nohup.out; then
               kill $PID
               exit 0
             fi
