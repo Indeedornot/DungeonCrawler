@@ -31,4 +31,8 @@ public class ItemFactory {
     public Item createHealthPotion(int amount) {
         return new HealthPotion(playerManager, amount);
     }
+    
+    public Item createDungeonKey() {
+        return new DungeonKey();
+    }
 }

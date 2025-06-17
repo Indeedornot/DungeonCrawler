@@ -17,6 +17,8 @@ public class StringRoomPrinter extends AbstractRoomPrinter implements RoomPrinte
         { put(CorridorRoom.class, "x"); }
         { put(NullRoom.class, "."); }
         { put(TreasureRoom.class, "$"); }
+        { put(KeyRoom.class, "K"); }
+        { put(ExitRoom.class, "E"); }
     };
 
     @Override

@@ -126,6 +126,7 @@ public class ConsoleInterface implements GuiInterface, ApplicationListener<Appli
             case PlayerDiedEvent diedEvent -> onDiedEvent(diedEvent);
             case DungeonEmptyEvent dungeonEmptyEvent -> onDungeonEmptyEvent(dungeonEmptyEvent);
             case ItemFoundEvent itemFoundEvent -> onItemFoundEvent(itemFoundEvent);
+            case DungeonCompletedEvent dungeonCompletedEvent -> onDungeonCompleted(dungeonCompletedEvent);
             default -> {}
         }
     }
@@ -146,6 +147,11 @@ public class ConsoleInterface implements GuiInterface, ApplicationListener<Appli
 
     private void onDiedEvent(PlayerDiedEvent event) {
         messagePrinter.delayed(MessagePrinter::playerDied);
+    }
+    
+    private void onDungeonCompleted(DungeonCompletedEvent event) {
+        var newFloor = event.getEventData().getNewFloor();
+        messagePrinter.delayed(f -> f.floorCompleted(newFloor));
     }
 
     private void onDungeonEmptyEvent(DungeonEmptyEvent event) {

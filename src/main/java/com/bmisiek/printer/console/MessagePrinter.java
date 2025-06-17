@@ -96,4 +96,8 @@ public class MessagePrinter {
 
         return builder.toString();
     }
+
+    public String floorCompleted(String newFloor) {
+        return "Congratulations! You have reached floor %s".formatted(newFloor);
+    }
 }
