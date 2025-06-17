@@ -70,8 +70,8 @@ public class ConsoleInterface implements GuiInterface, ApplicationListener<Appli
         }
     );
 
-    private final Map<GameAction, BiConsumer<Player, GameAction>> UI_ACTION_HANDLERS = Map.of(
-        InventoryAction.INSTANCE, (player, action) -> messagePrinter.immediate(f -> f.showInventory(player.getInventory()))
+    private final Map<Class<?>, BiConsumer<Player, GameAction>> UI_ACTION_HANDLERS = Map.of(
+        InventoryAction.class, (player, action) -> messagePrinter.immediate(f -> f.showInventory(player.getInventory()))
     );
 
     public @NotNull GameAction GetAction(DungeonManagerInterface dungeon, Player player) throws RuntimeException {
@@ -114,7 +114,7 @@ public class ConsoleInterface implements GuiInterface, ApplicationListener<Appli
     }
 
     private void HandleUIAction(Player player, GameAction action) {
-        UI_ACTION_HANDLERS.getOrDefault(action, (_, _) -> {}).accept(player, action);
+        UI_ACTION_HANDLERS.getOrDefault(action.getClass(), (_, _) -> {}).accept(player, action);
     }
 
     @Override
