@@ -10,6 +10,7 @@ import com.bmisiek.printer.contract.ActionNotFoundException;
 import com.bmisiek.printer.contract.GameAction;
 import com.bmisiek.printer.contract.GuiInterface;
 import com.bmisiek.printer.contract.actions.*;
+import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
@@ -23,7 +24,9 @@ import java.util.function.Function;
 public class ConsoleInterface implements GuiInterface, ApplicationListener<ApplicationEvent> {
     private final DungeonPrinter dungeonPrinter;
     private final DungeonPlayerPrinter dungeonPlayerPrinter;
-    private MessagePrinter messagePrinter;
+
+    @Getter
+    private final MessagePrinter messagePrinter;
 
     public ConsoleInterface(DungeonPrinter dungeonPrinter,
                             DungeonPlayerPrinter dungeonPlayerPrinter,
@@ -71,7 +74,7 @@ public class ConsoleInterface implements GuiInterface, ApplicationListener<Appli
     );
 
     private final Map<Class<?>, BiConsumer<Player, GameAction>> UI_ACTION_HANDLERS = Map.of(
-        InventoryAction.class, (player, action) -> messagePrinter.immediate(f -> f.showInventory(player.getInventory()))
+        InventoryAction.class, (player, action) -> getMessagePrinter().immediate(f -> f.showInventory(player.getInventory()))
     );
 
     public @NotNull GameAction GetAction(DungeonManagerInterface dungeon, Player player) throws RuntimeException {

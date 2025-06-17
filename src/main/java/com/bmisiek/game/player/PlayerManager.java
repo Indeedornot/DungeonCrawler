@@ -46,14 +46,6 @@ public class PlayerManager {
         applicationEventPublisher.publishEvent(new HealedEvent(this, new HealedEventData(player, actualHeal)));
     }
 
-    protected boolean isAlive(@NotNull Player player) {
-        return player.getHealth() > 0;
-    }
-
-    protected boolean isDead(@NotNull Player player) {
-        return player.getHealth() <= 0;
-    }
-
     /**
      * Use an item from the player's inventory
      * @param player The player using the item

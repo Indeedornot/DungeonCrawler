@@ -15,7 +15,7 @@ public abstract class Room {
         throw new IllegalStateException("No additional action description available");
     }
 
-    public void PerformAdditionalAction(Player player) {
+    public void PerformAdditionalAction(Player player) throws InvalidActionException {
         assert HasAdditionalActions();
     }
 

@@ -24,14 +24,6 @@ public class ItemFactory {
         return possibleItems.get(random.nextInt(possibleItems.size()));
     }
     
-    public Item createHealingAmplifier() {
-        return new HealingAmplifier();
-    }
-    
-    public Item createHealthPotion(int amount) {
-        return new HealthPotion(playerManager, amount);
-    }
-    
     public Item createDungeonKey() {
         return new DungeonKey();
     }

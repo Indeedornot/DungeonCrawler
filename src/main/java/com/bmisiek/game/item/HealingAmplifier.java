@@ -11,7 +11,7 @@ public class HealingAmplifier extends Item {
     @Override
     public boolean use(Player player) {
         player.setHealingAmplifier(2.0);
-        return false;
+        return super.use(player);
     }
     
     @Override

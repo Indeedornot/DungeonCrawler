@@ -15,23 +15,19 @@ import java.util.function.Function;
 public class MessagePrinter {
     private final Stack<String> messageQueue = new Stack<>();
 
-    public MessagePrinter immediate(Function<MessagePrinter, String> consumer) {
+    public void immediate(Function<MessagePrinter, String> consumer) {
         String message = consumer.apply(this);
         System.out.println(message);
-        return this;
     }
 
-    public MessagePrinter delayed(Function<MessagePrinter, String> consumer) {
+    public void delayed(Function<MessagePrinter, String> consumer) {
         String message = consumer.apply(this);
         messageQueue.push(message);
-        return this;
     }
 
-    public int dumpDelayed() {
-        int count = messageQueue.size();
+    public void dumpDelayed() {
         messageQueue.forEach(System.out::println);
         messageQueue.clear();
-        return count;
     }
 
     public String itemsInInventory() {

@@ -6,8 +6,6 @@ import com.bmisiek.game.item.ItemFactory;
 import com.bmisiek.game.player.Player;
 import lombok.Getter;
 
-import java.security.SecureRandom;
-
 /**
  * A room that contains treasure (items) that can be found
  */

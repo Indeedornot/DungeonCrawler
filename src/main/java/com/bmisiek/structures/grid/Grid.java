@@ -116,15 +116,15 @@ public class Grid<T> implements Iterable<Pair<Optional<T>, Point>> {
     }
 
     public void setAt(Point point, T value) {
-        setAt(point.getX(), point.getY(), value);
+        setAt(point.x(), point.y(), value);
     }
 
     public void setAt(Point point, @NotNull Optional<T> value) {
-        setAt(point.getX(), point.getY(), value);
+        setAt(point.x(), point.y(), value);
     }
 
     public Optional<T> getAt(Point point) {
-        return getAt(point.getX(), point.getY());
+        return getAt(point.x(), point.y());
     }
 
     public Optional<T> getAt(int x, int y) {
@@ -138,7 +138,7 @@ public class Grid<T> implements Iterable<Pair<Optional<T>, Point>> {
     }
 
     public boolean has(Point point) {
-        return has(point.getX(), point.getY());
+        return has(point.x(), point.y());
     }
 
     /**
@@ -164,7 +164,7 @@ public class Grid<T> implements Iterable<Pair<Optional<T>, Point>> {
     }
 
     public void insertSubgrid(Point point, Grid<T> subgrid) {
-        insertSubgrid(point.getX(), point.getY(), subgrid);
+        insertSubgrid(point.x(), point.y(), subgrid);
     }
 
     @Override

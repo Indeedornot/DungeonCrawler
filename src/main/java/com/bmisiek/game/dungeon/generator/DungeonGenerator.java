@@ -34,10 +34,10 @@ public class DungeonGenerator {
 
     private Point getDirectionPoint(Point currentPoint, int direction) {
         return switch (direction) {
-            case 0 -> new Point(currentPoint.getX() + 1, currentPoint.getY());
-            case 1 -> new Point(currentPoint.getX() - 1, currentPoint.getY());
-            case 2 -> new Point(currentPoint.getX(), currentPoint.getY() - 1);
-            default -> new Point(currentPoint.getX(), currentPoint.getY() + 1);
+            case 0 -> new Point(currentPoint.x() + 1, currentPoint.y());
+            case 1 -> new Point(currentPoint.x() - 1, currentPoint.y());
+            case 2 -> new Point(currentPoint.x(), currentPoint.y() - 1);
+            default -> new Point(currentPoint.x(), currentPoint.y() + 1);
         };
     }
 

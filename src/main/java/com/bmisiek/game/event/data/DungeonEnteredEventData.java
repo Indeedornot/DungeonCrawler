@@ -4,10 +4,8 @@ import com.bmisiek.game.player.Player;
 import lombok.Getter;
 
 @Getter
-public class DungeonEnteredEventData {
-    private final Player player;
-
+public class DungeonEnteredEventData extends PlayerEventData{
     public DungeonEnteredEventData(Player player) {
-        this.player = player;
+        super(player);
     }
 }

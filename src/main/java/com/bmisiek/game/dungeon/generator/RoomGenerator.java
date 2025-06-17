@@ -35,7 +35,7 @@ class RoomGenerator implements RoomGeneratorInterface {
             for (int dy = -1; dy <= 1; dy++) {
                 if (dx == 0 && dy == 0) continue;
 
-                Point neighborPoint = new Point(point.getX() + dx, point.getY() + dy);
+                Point neighborPoint = new Point(point.x() + dx, point.y() + dy);
                 if (!rooms.containsKey(neighborPoint)) {
                     continue;
                 }

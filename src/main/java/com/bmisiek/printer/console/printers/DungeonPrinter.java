@@ -150,7 +150,7 @@ public class DungeonPrinter implements PrinterInterface<DungeonManagerInterface>
         finalGrid.setAt(0, 0, centerHorizontally("", COORDINATE_AXIS_PADDING));
 
         for (int roomX = 0; roomX < printStringGrid.getXSize(); roomX++) {
-            int dungeonX = layoutInfo.topLeft().getX() + roomX;
+            int dungeonX = layoutInfo.topLeft().x() + roomX;
             String xLabel = String.valueOf(dungeonX);
             finalGrid.setAt(roomX + 1, 0, centerHorizontally(xLabel, ROOM_WIDTH));
         }
@@ -174,7 +174,7 @@ public class DungeonPrinter implements PrinterInterface<DungeonManagerInterface>
 
         int labelCenterLineOffset = effectiveCellHeight / 2;
         for (int roomY = 0; roomY < gridWithY.getYSize(); roomY++) {
-            int dungeonY = layoutInfo.topLeft().getY() + roomY;
+            int dungeonY = layoutInfo.topLeft().y() + roomY;
             String yLabel = String.valueOf(dungeonY);
             String centeredYLabel = centerHorizontally(yLabel, COORDINATE_AXIS_PADDING);
 
@@ -198,8 +198,8 @@ public class DungeonPrinter implements PrinterInterface<DungeonManagerInterface>
             return new DungeonLayoutInfo(new Point(0, 0), new Point(0, 0), 1, 1);
         }
 
-        var xs = rooms.keySet().stream().mapToInt(Point::getX).toArray();
-        var ys = rooms.keySet().stream().mapToInt(Point::getY).toArray();
+        var xs = rooms.keySet().stream().mapToInt(Point::x).toArray();
+        var ys = rooms.keySet().stream().mapToInt(Point::y).toArray();
 
         int minX = Arrays.stream(xs).min().orElse(0);
         int maxX = Arrays.stream(xs).max().orElse(0);

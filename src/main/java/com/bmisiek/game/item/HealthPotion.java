@@ -16,7 +16,7 @@ public class HealthPotion extends Item {
     @Override
     public boolean use(Player player) {
         playerManager.healDirectly(player, healAmount);
-        return true;
+        return super.use(player);
     }
     
     @Override

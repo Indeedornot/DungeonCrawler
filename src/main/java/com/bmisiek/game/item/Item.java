@@ -17,7 +17,9 @@ public abstract class Item {
      * @param player The player to use the item on
      * @return True if the item was consumed, false otherwise
      */
-    public abstract boolean use(Player player);
+    public boolean use(Player player) {
+        return isConsumable();
+    }
     
     public abstract boolean isConsumable();
 }
