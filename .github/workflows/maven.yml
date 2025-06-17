@@ -55,9 +55,17 @@ jobs:
         with:
           name: dungeon-crawler-jar
           path: target/*.jar
+      - name: Create Release Tag
+        run: |
+          VERSION="v$(date +'%Y%m%d%H%M%S')"
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git tag $VERSION
+          git push origin $VERSION
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ steps.create_tag.outputs.tag }}
           files: target/*.jar
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
