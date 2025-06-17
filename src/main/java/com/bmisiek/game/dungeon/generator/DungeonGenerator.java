@@ -4,8 +4,7 @@ import com.bmisiek.game.dungeon.Dungeon;
 import com.bmisiek.structures.Point;
 import com.bmisiek.game.config.GameConfigManager;
 import com.bmisiek.game.dungeon.interfaces.RoomGeneratorInterface;
-import com.bmisiek.game.room.Room;
-import com.bmisiek.game.room.SpawnRoom;
+import com.bmisiek.game.room.*;
 import jakarta.annotation.Nullable;
 import org.springframework.data.domain.Range;
 import org.springframework.data.util.Pair;
@@ -21,11 +20,16 @@ public class DungeonGenerator {
     private final RoomGeneratorInterface roomGenerator;
     private final DungeonFactory dungeonFactory;
     private final Range<Integer> roomCountRange;
+    private final RoomFactory roomFactory;
 
-    DungeonGenerator(DungeonFactory dungeonFactory, RoomGeneratorFactory roomGeneratorFactory, GameConfigManager gameConfigManager) {
+    DungeonGenerator(DungeonFactory dungeonFactory,
+                    RoomGeneratorFactory roomGeneratorFactory,
+                    GameConfigManager gameConfigManager,
+                    RoomFactory roomFactory) {
         this.dungeonFactory = dungeonFactory;
         this.roomGenerator = roomGeneratorFactory.create(rooms);
         this.roomCountRange = gameConfigManager.getConfig().getRoomCount();
+        this.roomFactory = roomFactory;
     }
 
     private Point getDirectionPoint(Point currentPoint, int direction) {
@@ -77,7 +81,6 @@ public class DungeonGenerator {
 
         rooms.put(pair.getFirst(), pair.getSecond());
         return pair.getFirst();
-
     }
 
     /**
@@ -88,12 +91,65 @@ public class DungeonGenerator {
     }
 
     public Dungeon createDungeon() {
+        rooms.clear();
+
         Point startPoint = new Point(0,0);
         CreateRooms(startPoint);
+
+        addSpecialRoom(KeyRoom.class);
+        addSpecialRoom(ExitRoom.class);
 
         ValidateDungeon();
 
         return dungeonFactory.create(rooms, startPoint);
+    }
+
+    /**
+     * Add a special room to the dungeon
+     */
+    private void addSpecialRoom(Class<? extends Room> roomClass) {
+        Point attachPoint = getValidAttachmentPoint(roomClass);
+
+        if (attachPoint != null) {
+            try {
+                Room specialRoom = roomFactory.createRoom(roomClass);
+                Point position = getNextPotentialPoint(attachPoint);
+
+                if (position != null) {
+                    rooms.put(position, specialRoom);
+                }
+            } catch (Exception e) {
+                System.err.println("Failed to create special room: " + e.getMessage());
+            }
+        }
+    }
+
+    /**
+     * Find a valid point to attach special room
+     */
+    private Point getValidAttachmentPoint(Class<? extends Room> roomClass) {
+        List<Point> validPoints = new ArrayList<>();
+
+        for (Map.Entry<Point, Room> entry : rooms.entrySet()) {
+            if (roomClass.equals(KeyRoom.class) && !(entry.getValue() instanceof SpawnRoom) &&
+                !(entry.getValue() instanceof ExitRoom)) {
+                Point point = entry.getKey();
+                if (getNextPotentialPoint(point) != null) {
+                    validPoints.add(point);
+                }
+            } else if (roomClass.equals(ExitRoom.class) && entry.getValue() instanceof CorridorRoom) {
+                Point point = entry.getKey();
+                if (getNextPotentialPoint(point) != null) {
+                    validPoints.add(point);
+                }
+            }
+        }
+
+        if (!validPoints.isEmpty()) {
+            return validPoints.get(random.nextInt(validPoints.size()));
+        }
+
+        return getNewEntrypoint(); // Fallback to any point
     }
 
     private void CreateRooms(Point currentPoint) {
