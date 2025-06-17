@@ -2,7 +2,10 @@ package com.bmisiek.game.gameloop;
 
 import com.bmisiek.game.dungeon.DungeonManagerInterface;
 import com.bmisiek.game.dungeon.generator.DungeonGenerator;
+import com.bmisiek.game.event.DungeonCompletedEvent;
 import com.bmisiek.game.event.DungeonEmptyEvent;
+import com.bmisiek.game.event.FloorCompletedEvent;
+import com.bmisiek.game.event.data.DungeonCompletedEventData;
 import com.bmisiek.game.exception.InvalidActionException;
 import com.bmisiek.game.player.Player;
 import com.bmisiek.game.player.PlayerFactory;
@@ -15,16 +18,21 @@ import com.bmisiek.printer.contract.actions.SearchAction;
 import com.bmisiek.printer.contract.actions.UseItemAction;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 @Service
 public class GameLoop implements ApplicationListener<DungeonEmptyEvent> {
     private final GuiInterface gui;
+    private final DungeonGenerator dungeonGenerator;
+    private final ApplicationEventPublisher publisher;
 
     @Getter
     private final DungeonManagerInterface dungeonManager;
@@ -35,6 +43,9 @@ public class GameLoop implements ApplicationListener<DungeonEmptyEvent> {
     @Getter
     private final Player player;
 
+    @Getter
+    private int currentFloor = 1;
+
     private boolean isCancelled = false;
 
     public GameLoop(
@@ -42,11 +53,14 @@ public class GameLoop implements ApplicationListener<DungeonEmptyEvent> {
             DungeonManagerInterface dungeonManager,
             DungeonGenerator generator,
             PlayerFactory playerFactory,
-            PlayerManager playerManager
+            PlayerManager playerManager,
+            ApplicationEventPublisher publisher
     ) {
         this.gui = gui;
         this.playerManager = playerManager;
         this.player = playerFactory.createPlayer();
+        this.dungeonGenerator = generator;
+        this.publisher = publisher;
 
         dungeonManager.setDungeon(generator.createDungeon());
         this.dungeonManager = dungeonManager;
@@ -82,10 +96,9 @@ public class GameLoop implements ApplicationListener<DungeonEmptyEvent> {
 
     private void handleAction(@NotNull GameAction action) {
         try {
-            Consumer<GameAction> handler = actionHandlers.get(action.getClass());
-            if (handler != null) {
-                handler.accept(action);
-            }
+            actionHandlers
+                    .getOrDefault(action.getClass(), _ -> {})
+                    .accept(action);
         } catch (InvalidActionException e) {
             System.out.println(e.getMessage());
         }
@@ -94,5 +107,16 @@ public class GameLoop implements ApplicationListener<DungeonEmptyEvent> {
     @Override
     public void onApplicationEvent(@NotNull DungeonEmptyEvent event) {
         this.isCancelled = true;
+    }
+    
+    @EventListener
+    public void onFloorCompleted(FloorCompletedEvent event) {
+        var current = currentFloor;
+
+        currentFloor += 1;
+        dungeonManager.setDungeon(dungeonGenerator.createDungeon());
+        dungeonManager.enter(player);
+
+        publisher.publishEvent(new DungeonCompletedEvent(this, new DungeonCompletedEventData(player, String.valueOf(current), String.valueOf(currentFloor))));
     }
 }
